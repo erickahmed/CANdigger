@@ -5,3 +5,6 @@
 .mxproject
 .settings
 .DS_Store
+.metadata
+Core/Src/Backup/
+Core/Inc/Backup/
