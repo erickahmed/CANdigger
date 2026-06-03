@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "canlog.h"
 #include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -48,20 +49,6 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
-/* Definitions for canBus1Listen */
-osThreadId_t canBus1ListenHandle;
-const osThreadAttr_t canBus1Listen_attributes = {
-  .name = "canBus1Listen",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
-};
-/* Definitions for canBus2Listen */
-osThreadId_t canBus2ListenHandle;
-const osThreadAttr_t canBus2Listen_attributes = {
-  .name = "canBus2Listen",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -73,7 +60,6 @@ static void MX_DMA_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
-void can_listen(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -119,6 +105,9 @@ int main(void)
   MX_SDIO_SD_Init();
   /* USER CODE BEGIN 2 */
 
+  // Initialize CAN1 and CAN2
+  CAN_Logger_Init(&hcan1, &hcan2);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -139,13 +128,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* creation of canBus1Listen */
-  canBus1ListenHandle = osThreadNew(can_listen, (void*) &hcan1, &canBus1Listen_attributes);
-
-  /* creation of canBus2Listen */
-  canBus2ListenHandle = osThreadNew(can_listen, (void*) &hcan2, &canBus2Listen_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -422,23 +404,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_can_listen */
-/**
-  * @brief  Function implementing the canBus0Listen thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_can_listen */
-void can_listen(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
+
 
 /**
   * @brief  Period elapsed callback in non blocking mode
