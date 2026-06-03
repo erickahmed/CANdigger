@@ -2,6 +2,9 @@
 #include "cmsis_os.h"
 #include <string.h>
 
+extern CAN_HandleTypeDef hcan1;
+extern CAN_HandleTypeDef hcan2;
+
 /* Definitions for canBus1Listen */
 osThreadId_t canBus1ListenHandle;
 const osThreadAttr_t canBus1Listen_attributes = {
