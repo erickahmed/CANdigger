@@ -8,3 +8,5 @@
 .metadata
 Core/Src/Backup/
 Core/Inc/Backup/
+.bak
+.gitignore

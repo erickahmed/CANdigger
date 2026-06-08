@@ -140,13 +140,13 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
+  /* USER CODE BEGIN RTOS_THREADS */
+
   vCAN1_rx = osThreadNew(vCAN_log, (void*)&hcan1, &vCAN1_rx_attributes);
   vCAN2_rx = osThreadNew(vCAN_log, (void*)&hcan2, &vCAN2_rx_attributes);
   vLED_CAN1_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can1, &vLED_CAN1_Heartbeat_attributes);
   vLED_CAN2_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can2, &vLED_CAN2_Heartbeat_attributes);
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
