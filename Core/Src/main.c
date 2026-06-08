@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "canlog.h"
 #include "cmsis_os.h"
+#include "canlog.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -49,6 +49,40 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
+/* FreeRTOS task definitions */
+
+/* Definitions for CAN1rx incoming */
+osThreadId_t vCAN1_rx;
+const osThreadAttr_t vCAN1_rx_attributes = {
+  .name = "vCAN1_rx",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime1,
+};
+
+/* Definitions for CAN2rx incoming*/
+osThreadId_t vCAN2_rx;
+const osThreadAttr_t vCAN2_rx_attributes = {
+  .name = "vCAN2_rx",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+
+/* Definitions for CAN1 LED heartbeat */
+osThreadId_t vLED_CAN1_Heartbeat;
+const osThreadAttr_t vLED_CAN1_Heartbeat_attributes = {
+  .name = "vLED_CAN1_HeartbeatTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow1,
+};
+
+/* Definitions for CAN2 LED heartbeat */
+osThreadId_t vLED_CAN2_Heartbeat;
+const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
+  .name = "vLED_CAN2_HeartbeatTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -60,6 +94,7 @@ static void MX_DMA_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
+void vLED_HeartbeatOnCanRx(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -128,6 +163,12 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  vCAN1_rx = osThreadNew(vCAN_log, NULL, &vCAN1_rx_attributes);
+  vCAN2_rx = osThreadNew(vCAN_log, NULL, &vCAN2_rx_attributes);
+  vLED_CAN1_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, NULL, &vLED_CAN1_Heartbeat_attributes);
+  vLED_CAN2_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, NULL, &vLED_CAN2_Heartbeat_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -403,8 +444,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-
 
 /**
   * @brief  Period elapsed callback in non blocking mode

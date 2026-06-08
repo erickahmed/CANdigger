@@ -24,14 +24,15 @@ const osThreadAttr_t canBus2Listen_attributes = {
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2){}
 static void CAN_Listen(void *argument){}
 
-/* BEGIN Header_CAN_Listen */
+
+
+/* BEGIN vCAN_log */
 /**
-  * @brief  Function implementing the canBus0Listen thread.
+  * @brief  Log incoming CAN bus traffic.
   * @param  argument: Not used
   * @retval None
   */
-/* END Header_CAN_Listen */
-void CAN_Listen(void *argument)
+void vCAN_log(void *argument)
 {
   /* CODE BEGIN */
   /* Infinite loop */
@@ -41,3 +42,23 @@ void CAN_Listen(void *argument)
   }
   /* CODE END */
 }
+/* END vCAN_log */
+
+
+/* BEGIN vLED_HeartbeatOnCanRx */
+/**
+  * @brief  Blink a LED in heartbeat mode when there is CAN traffic detected.
+  * @param  argument: Not used
+  * @retval None
+  */
+void vLED_HeartbeatOnCanRx(void *argument)
+{
+  /* CODE BEGIN */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* CODE END */
+}
+/* vLED_HeartbeatOnCanRx */
