@@ -71,10 +71,12 @@ void vCAN_log(void *argument)
 void vLED_HeartbeatOnCanRx(void *argument)
 {
   /* CODE BEGIN */
-  /* Infinite loop */
+  LED_Config *led = (LED_Config*)argument;
+
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(led->port, led->pin);
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
   /* CODE END */
 }
