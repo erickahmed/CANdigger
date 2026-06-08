@@ -142,8 +142,8 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
 
-  vCAN1_rx = osThreadNew(vCAN_log, (void*)&hcan1, &vCAN1_rx_attributes);
-  vCAN2_rx = osThreadNew(vCAN_log, (void*)&hcan2, &vCAN2_rx_attributes);
+  vCAN1_rx = osThreadNew(vCAN_log, &hcan1, &vCAN1_rx_attributes);
+  vCAN2_rx = osThreadNew(vCAN_log, &hcan2, &vCAN2_rx_attributes);
   vLED_CAN1_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can1, &vLED_CAN1_Heartbeat_attributes);
   vLED_CAN2_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can2, &vLED_CAN2_Heartbeat_attributes);
 
