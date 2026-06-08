@@ -28,12 +28,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 typedef struct {
     GPIO_TypeDef* port;
     uint16_t       pin;
 } LED_Config;
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -55,10 +53,8 @@ DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
 /* USER CODE BEGIN PV */
-
 LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,10 +66,8 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
-
 void vCAN_log(void *argument);
 void vLED_HeartbeatOnCanRx(void *argument);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -141,12 +135,10 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-
   vCAN1_rx = osThreadNew(vCAN_log, &hcan1, &vCAN1_rx_attributes);
   vCAN2_rx = osThreadNew(vCAN_log, &hcan2, &vCAN2_rx_attributes);
   vLED_CAN1_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can1, &vLED_CAN1_Heartbeat_attributes);
   vLED_CAN2_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can2, &vLED_CAN2_Heartbeat_attributes);
-
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
