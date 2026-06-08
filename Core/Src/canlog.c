@@ -1,3 +1,4 @@
+
 #include "canlog.h"
 #include "cmsis_os.h"
 #include <string.h>
@@ -65,7 +66,7 @@ void vCAN_log(void *argument)
 /* BEGIN vLED_HeartbeatOnCanRx */
 /**
   * @brief  Blink a LED in heartbeat mode when there is CAN traffic detected.
-  * @param  argument: Not used
+  * @param  argument: LED GPIO
   * @retval None
   */
 void vLED_HeartbeatOnCanRx(void *argument)
@@ -75,9 +76,14 @@ void vLED_HeartbeatOnCanRx(void *argument)
 
   for(;;)
   {
+    //TODO: add condition -> led High only when CANrx
+    //      else led Low
+    // Depends on can log functions
+    // Use semaphore or message queue
+
     HAL_GPIO_TogglePin(led->port, led->pin);
     vTaskDelay(pdMS_TO_TICKS(100));
   }
   /* CODE END */
 }
-/* vLED_HeartbeatOnCanRx */
+/* END vLED_HeartbeatOnCanRx */
