@@ -230,7 +230,7 @@ static void MX_CAN1_Init(void)
   hcan1.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
-  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoWakeUp = ENABLE;
   hcan1.Init.AutoRetransmission = DISABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
@@ -267,7 +267,7 @@ static void MX_CAN2_Init(void)
   hcan2.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
-  hcan2.Init.AutoWakeUp = DISABLE;
+  hcan2.Init.AutoWakeUp = ENABLE;
   hcan2.Init.AutoRetransmission = DISABLE;
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
