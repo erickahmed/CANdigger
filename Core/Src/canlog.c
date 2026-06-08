@@ -66,7 +66,7 @@ void vCAN_log(void *argument)
 /* BEGIN vLED_HeartbeatOnCanRx */
 /**
   * @brief  Blink a LED in heartbeat mode when there is CAN traffic detected.
-  * @param  argument: LED GPIO
+  * @param  argument: LED GPIO (port and pin)
   * @retval None
   */
 void vLED_HeartbeatOnCanRx(void *argument)
