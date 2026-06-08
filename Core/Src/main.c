@@ -94,7 +94,6 @@ static void MX_DMA_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
-void vLED_HeartbeatOnCanRx(void *argument);
 
 /* USER CODE BEGIN PFP */
 
