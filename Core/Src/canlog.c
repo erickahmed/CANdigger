@@ -5,26 +5,43 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
-/* Definitions for canBus1Listen */
-osThreadId_t canBus1ListenHandle;
-const osThreadAttr_t canBus1Listen_attributes = {
-  .name = "canBus1Listen",
+/* FreeRTOS task definitions */
+
+/* Definitions for CAN1rx incoming */
+osThreadId_t vCAN1_rx;
+const osThreadAttr_t vCAN1_rx_attributes = {
+  .name = "vCAN1_rx",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime1,
 };
-/* Definitions for canBus2Listen */
-osThreadId_t canBus2ListenHandle;
-const osThreadAttr_t canBus2Listen_attributes = {
-  .name = "canBus2Listen",
+
+/* Definitions for CAN2rx incoming*/
+osThreadId_t vCAN2_rx;
+const osThreadAttr_t vCAN2_rx_attributes = {
+  .name = "vCAN2_rx",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
+};
+
+/* Definitions for CAN1 LED heartbeat */
+osThreadId_t vLED_CAN1_Heartbeat;
+const osThreadAttr_t vLED_CAN1_Heartbeat_attributes = {
+  .name = "vLED_CAN1_HeartbeatTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow1,
+};
+
+/* Definitions for CAN2 LED heartbeat */
+osThreadId_t vLED_CAN2_Heartbeat;
+const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
+  .name = "vLED_CAN2_HeartbeatTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 
 /* Private function prototypes -----------------------------------------------*/
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2){}
 static void CAN_Listen(void *argument){}
-
-
 
 /* BEGIN vCAN_log */
 /**

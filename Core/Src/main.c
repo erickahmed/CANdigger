@@ -49,40 +49,6 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
-/* FreeRTOS task definitions */
-
-/* Definitions for CAN1rx incoming */
-osThreadId_t vCAN1_rx;
-const osThreadAttr_t vCAN1_rx_attributes = {
-  .name = "vCAN1_rx",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
-};
-
-/* Definitions for CAN2rx incoming*/
-osThreadId_t vCAN2_rx;
-const osThreadAttr_t vCAN2_rx_attributes = {
-  .name = "vCAN2_rx",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
-
-/* Definitions for CAN1 LED heartbeat */
-osThreadId_t vLED_CAN1_Heartbeat;
-const osThreadAttr_t vLED_CAN1_Heartbeat_attributes = {
-  .name = "vLED_CAN1_HeartbeatTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow1,
-};
-
-/* Definitions for CAN2 LED heartbeat */
-osThreadId_t vLED_CAN2_Heartbeat;
-const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
-  .name = "vLED_CAN2_HeartbeatTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -96,6 +62,9 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
+
+void vCAN_log(void *argument);
+void vLED_HeartbeatOnCanRx(void *argument);
 
 /* USER CODE END PFP */
 
