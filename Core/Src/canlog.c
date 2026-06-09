@@ -6,8 +6,7 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
-/* FreeRTOS task definitions */
-
+/* USER CODE BEGIN RTOS_TASKS */
 /* Definitions for CAN1rx incoming */
 osThreadId_t vCAN1_rx;
 const osThreadAttr_t vCAN1_rx_attributes = {
@@ -39,6 +38,8 @@ const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* USER END RTOS_TASKS */
+
 
 /* Private function prototypes -----------------------------------------------*/
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2){}
@@ -76,10 +77,8 @@ void vLED_HeartbeatOnCanRx(void *argument)
 
   for(;;)
   {
-    //TODO: add condition -> led High only when CANrx
-    //      else led Low
-    // Depends on can log functions
-    // Use semaphore or message queue
+    //HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+    // if semaphore for canrx, do the rest
 
     HAL_GPIO_TogglePin(led->port, led->pin);
     vTaskDelay(pdMS_TO_TICKS(100));

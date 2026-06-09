@@ -107,11 +107,10 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_SDIO_SD_Init();
+
   /* USER CODE BEGIN 2 */
-
-  // Initialize CAN1 and CAN2
+  /* Initialize CAN1 and CAN2 */
   CAN_Logger_Init(&hcan1, &hcan2);
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
