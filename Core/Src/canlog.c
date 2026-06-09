@@ -80,7 +80,10 @@ void vLED_HeartbeatOnCanRx(void *argument)
     //HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
     // if semaphore for canrx, do the rest
 
-    HAL_GPIO_TogglePin(led->port, led->pin);
+
+    HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
     vTaskDelay(pdMS_TO_TICKS(100));
   }
   /* CODE END */
