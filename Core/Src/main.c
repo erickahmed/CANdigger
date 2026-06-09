@@ -54,6 +54,7 @@ DMA_HandleTypeDef hdma_sdio_tx;
 /* USER CODE BEGIN PV */
 LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
+LED_Config led_error = {GPIOB, GPIO_PIN_3};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -441,8 +442,19 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+
+  //TODO: check if it is necessary to stop FreeRTOS
+
+  uint32_t error_code;
+  if (hcan == &hcan1) error_code = HAL_CAN_GetError(&hcan1);
+  else if (hcan == &hcan2) error_code = HAL_CAN_GetError(&hcan2);
+
+  // TODO: write error to SD and/or serial
+
   while (1)
   {
+    HAL_GPIO_TogglePin(led_error.port, led_error.pin);
+    HAL_Delay(250);
   }
   /* USER CODE END Error_Handler_Debug */
 }
