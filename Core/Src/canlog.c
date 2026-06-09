@@ -44,13 +44,13 @@ const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2){}
 static void CAN_Listen(void *argument){}
 
-/* BEGIN vCAN_log */
+/* BEGIN vCAN_Get */
 /**
-  * @brief  Log incoming CAN bus traffic.
+  * @brief  Log incoming CAN bus traffic in FIFO buffer
   * @param  argument: Not used
   * @retval None
   */
-void vCAN_log(void *argument)
+void vCAN_Get(void *argument)
 {
   /* CODE BEGIN */
   /* Infinite loop */
@@ -60,12 +60,12 @@ void vCAN_log(void *argument)
   }
   /* CODE END */
 }
-/* END vCAN_log */
+/* END vCAN_Get */
 
 
 /* BEGIN vLED_HeartbeatOnCanRx */
 /**
-  * @brief  Blink a LED in heartbeat mode when there is CAN traffic detected.
+  * @brief  Blink a LED in heartbeat mode when there is CAN traffic detected
   * @param  argument: LED GPIO (port and pin)
   * @retval None
   */

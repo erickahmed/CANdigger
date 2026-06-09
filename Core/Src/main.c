@@ -66,7 +66,7 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
-void vCAN_log(void *argument);
+void vCAN_Get(void *argument);
 void vLED_HeartbeatOnCanRx(void *argument);
 /* USER CODE END PFP */
 
@@ -135,8 +135,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  vCAN1_rx = osThreadNew(vCAN_log, &hcan1, &vCAN1_rx_attributes);
-  vCAN2_rx = osThreadNew(vCAN_log, &hcan2, &vCAN2_rx_attributes);
+  vCAN1_rx = osThreadNew(vCAN_Get, &hcan1, &vCAN1_rx_attributes);
+  vCAN2_rx = osThreadNew(vCAN_Get, &hcan2, &vCAN2_rx_attributes);
   vLED_CAN1_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can1, &vLED_CAN1_Heartbeat_attributes);
   vLED_CAN2_Heartbeat = osThreadNew(vLED_HeartbeatOnCanRx, &led_can2, &vLED_CAN2_Heartbeat_attributes);
   /* USER CODE END RTOS_THREADS */
