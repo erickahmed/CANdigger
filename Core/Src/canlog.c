@@ -129,9 +129,9 @@ void vLED_Heartbeat(void *argument)
 
 
     HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    osDelay(100);
     HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    osDelay(100);
   }
   /* CODE END */
 }
