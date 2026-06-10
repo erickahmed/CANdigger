@@ -99,7 +99,7 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
   * @param  argument: Not used
   * @retval None
   */
-static void vCAN_Logger_Listen(void *argument)
+void vCAN_Logger_Listen(void *argument)
 {
     /* CODE BEGIN */
     /* Infinite loop */
