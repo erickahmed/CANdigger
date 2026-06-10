@@ -41,7 +41,7 @@ extern const osThreadAttr_t vLED_CAN2_Heartbeat_attributes;
   * @param  hcan2 Pointer to the CAN2 handle
   */
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2);
-void vCAN_Get(void *argument);
-void vLED_HeartbeatOnCanRx(void *argument);
+void vCAN_Logger_Listen(void *argument);
+void vLED_Heartbeat(void *argument);
 
 #endif /* CANLOG_H */
