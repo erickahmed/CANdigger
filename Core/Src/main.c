@@ -459,6 +459,9 @@ void Error_Handler(void)
 
   // TODO: write error to SD and/or serial
 
+  HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led_can2.port, led_can2.pin, GPIO_PIN_RESET);
+
   while (1)
   {
     HAL_GPIO_TogglePin(led_error.port, led_error.pin);
