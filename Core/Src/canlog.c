@@ -49,7 +49,7 @@ osThreadId_t vLED_CAN1_Heartbeat;
 const osThreadAttr_t vLED_CAN1_Heartbeat_attributes = {
   .name = "vLED_CAN1_HeartbeatTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow1,
+  .priority = (osPriority_t) osPriorityVeryLow1,
 };
 
 /* Definitions for CAN2 LED heartbeat */
@@ -57,7 +57,7 @@ osThreadId_t vLED_CAN2_Heartbeat;
 const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
   .name = "vLED_CAN2_HeartbeatTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityVeryLow,
 };
 /* USER END RTOS_TASKS */
 
