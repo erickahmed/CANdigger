@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "canlog.h"
+#include <system_error>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -445,11 +446,10 @@ void Error_Handler(void)
 
   //TODO: check if it is necessary to stop FreeRTOS
 
-  uint32_t error_can1 == 0;
-  uint32_t error_can2 == 0;
+  uint32_t error_code;
 
   if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY) error_code = HAL_CAN_GetError(&hcan1);
-  else if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code = HAL_CAN_GetError(&hcan2);
+  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code = HAL_CAN_GetError(&hcan2);
 
   // TODO: write error to SD and/or serial
 
