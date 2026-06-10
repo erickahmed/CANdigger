@@ -66,7 +66,7 @@ const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
 /* USER CODE BEGIN FunctionPrototypes */
 /* BEGIN CAN_Logger_Init */
 /**
-  * @brief  Initialize CAN
+  * @brief  Initialize CAN bus logger.
   * @param  argument: hcan1, hcan2
   * @retval None
   */
