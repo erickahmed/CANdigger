@@ -121,6 +121,21 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
+  /* USER CODE BEGIN RTOS_TASKS */
+  osThreadId_t vCAN1_rx;
+  const osThreadAttr_t vCAN1_rx_attributes = {
+    .name = "vCAN1_rx",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityRealtime1,
+  };
+  osThreadId_t vCAN2_rx;
+  const osThreadAttr_t vCAN2_rx_attributes = {
+    .name = "vCAN2_rx",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityRealtime,
+  };
+  /* USER END RTOS_TASKS */
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */

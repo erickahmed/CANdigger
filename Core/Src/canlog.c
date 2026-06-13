@@ -27,25 +27,6 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
-/* USER CODE BEGIN RTOS_TASKS */
-/* Definitions for CAN1rx incoming */
-osThreadId_t vCAN1_rx;
-const osThreadAttr_t vCAN1_rx_attributes = {
-  .name = "vCAN1_rx",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
-};
-
-/* Definitions for CAN2rx incoming*/
-osThreadId_t vCAN2_rx;
-const osThreadAttr_t vCAN2_rx_attributes = {
-  .name = "vCAN2_rx",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
-/* USER END RTOS_TASKS */
-
-
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 /* BEGIN CAN_Logger_Init */
