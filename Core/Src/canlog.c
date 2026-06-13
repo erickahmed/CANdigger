@@ -43,22 +43,6 @@ const osThreadAttr_t vCAN2_rx_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
-
-/* Definitions for CAN1 LED heartbeat */
-osThreadId_t vLED_CAN1_Heartbeat;
-const osThreadAttr_t vLED_CAN1_Heartbeat_attributes = {
-  .name = "vLED_CAN1_HeartbeatTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityVeryLow1,
-};
-
-/* Definitions for CAN2 LED heartbeat */
-osThreadId_t vLED_CAN2_Heartbeat;
-const osThreadAttr_t vLED_CAN2_Heartbeat_attributes = {
-  .name = "vLED_CAN2_HeartbeatTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityVeryLow,
-};
 /* USER END RTOS_TASKS */
 
 
@@ -121,18 +105,7 @@ void vLED_Heartbeat(void *argument)
 {
   /* CODE BEGIN */
   LED_Config *led = (LED_Config*)argument;
-
-  for(;;)
-  {
-    //HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
-    // if semaphore for canrx, do the rest
-
-
-    HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
-    osDelay(100);
-    HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
-    osDelay(100);
-  }
+  HAL_GPIO_TogglePin(led->port, led->pin);
   /* CODE END */
 }
 /* END vLED_HeartbeatOnCanRx */

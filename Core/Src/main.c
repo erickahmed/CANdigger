@@ -56,6 +56,9 @@ DMA_HandleTypeDef hdma_sdio_tx;
 LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
+
+osTimerId_t heartbeat_timer_can1;
+osTimerId_t heartbeat_timer_can2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,7 +130,11 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+  heartbeat_timer_can1 = osTimerNew(vLED_Heartbeat, osTimerPeriodic, &led_can1, NULL);
+  if (heartbeat_timer_can1 != NULL) osTimerStart(heartbeat_timer_can1, 250U);
+
+  heartbeat_timer_can2 = osTimerNew(vLED_Heartbeat, osTimerPeriodic, &led_can2, NULL);
+  if (heartbeat_timer_can2 != NULL) osTimerStart(heartbeat_timer_can2, 250U);
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -137,8 +144,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   vCAN1_rx = osThreadNew(vCAN_Logger_Listen, &hcan1, &vCAN1_rx_attributes);
   vCAN2_rx = osThreadNew(vCAN_Logger_Listen, &hcan2, &vCAN2_rx_attributes);
-  vLED_CAN1_Heartbeat = osThreadNew(vLED_Heartbeat, &led_can1, &vLED_CAN1_Heartbeat_attributes);
-  vLED_CAN2_Heartbeat = osThreadNew(vLED_Heartbeat, &led_can2, &vLED_CAN2_Heartbeat_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -446,12 +451,16 @@ void Error_Handler(void)
 
   //TODO: check if it is necessary to stop FreeRTOS
 
-  uint32_t error_code;
+  uint32_t error_code_can1;
+  uint32_t error_code_can2;
 
-  if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY) error_code = HAL_CAN_GetError(&hcan1);
-  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code = HAL_CAN_GetError(&hcan2);
+  if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY) error_code_can1 = HAL_CAN_GetError(&hcan1);
+  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code_can2 = HAL_CAN_GetError(&hcan2);
 
   // TODO: write error to SD and/or serial
+
+  HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led_can2.port, led_can2.pin, GPIO_PIN_RESET);
 
   while (1)
   {
