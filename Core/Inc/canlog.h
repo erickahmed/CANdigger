@@ -24,20 +24,10 @@
 
 #include "main.h"
 
-/* Decladerations for queues */
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
-
-/* Decladerations for thread handles and attributes */
-extern osThreadId_t vCAN1_rx;
-extern osThreadId_t vCAN2_rx;
-extern osThreadId_t vLED_CAN1_Heartbeat;
-extern osThreadId_t vLED_CAN2_Heartbeat;
-
-extern const osThreadAttr_t vCAN1_rx_attributes;
-extern const osThreadAttr_t vCAN2_rx_attributes;
-extern const osThreadAttr_t vLED_CAN1_Heartbeat_attributes;
-extern const osThreadAttr_t vLED_CAN2_Heartbeat_attributes;
+extern osSemaphoreId_t xLEDSemaphoreCAN1;
+extern osSemaphoreId_t xLEDSemaphoreCAN2;
 
 /**
   * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
