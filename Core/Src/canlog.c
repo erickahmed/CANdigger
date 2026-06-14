@@ -61,6 +61,37 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 }
 /* END CAN_Logger_Init */
 
+/* BEGIN HAL_CAN_RxFifo0MsgPendingCallback */
+/**
+  * @brief  ISR for CAN message pending in FIFO0
+  * @param  argument: Can handle hcan (hcan1 or hcan2)
+  * @retval None
+  */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    /* CODE BEGIN */
+    CanMessage_t message;
+    CAN_RxHeaderTypeDef rxHeader;
+    uint8_t data[8];
+
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) Error_Handler();
+
+    message.id = rxHeader.ExtId;
+    message.dlc = rxHeader.DLC;
+    message.isExtended = (rxHeader.IDE == CAN_ID_EXT);
+    memcpy(message.payload, data, rxHeader.DLC);
+
+    osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK) Error_Handler();
+    // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
+
+    // Issue #1: set an event flag for led task
+    // osEventFlagsSet(xCanEventFlags, (hcan->Instance == CAN1) ? 0x01 : 0x02);
+
+    /* CODE END */
+}
+/* END HAL_CAN_RxFifo0MsgPendingCallback */
+
 /* BEGIN vCANLoggerListen */
 /**
   * @brief  Log incoming CAN bus traffic in FIFO buffer
