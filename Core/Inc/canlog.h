@@ -29,6 +29,12 @@ extern osMessageQueueId_t xCAN2RxQueue;
 extern osSemaphoreId_t xLEDSemaphoreCAN1;
 extern osSemaphoreId_t xLEDSemaphoreCAN2;
 
+typedef struct {
+    LED_Config *led;
+    osSemaphoreId_t semaphore;
+    osTimerId_t timer;
+} LEDContext;
+
 /**
   * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
   * @param  hcan1 Pointer to the CAN1 handle

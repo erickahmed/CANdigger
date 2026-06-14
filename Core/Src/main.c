@@ -41,12 +41,6 @@ typedef struct {
     //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
     // this is for getting timestamps on can messages
 } CanMessage_t;
-
-typedef struct {
-    LED_Config *led;
-    osSemaphoreId_t semaphore;
-    osTimerId_t timer;
-} LEDContext;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
