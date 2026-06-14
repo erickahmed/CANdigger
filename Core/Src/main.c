@@ -56,7 +56,7 @@ LEDContext ledContextCAN1;
 LEDContext ledContextCAN2;
 
 osSemaphoreId_t xSemaphoreCAN1;
-osSemaphoreId_t xLEDSemaphoreCAN2;
+osSemaphoreId_t xSemaphoreCAN2;
 
 osTimerId_t xHeartbeatTimerCAN1;
 osTimerId_t xHeartbeatTimerCAN2;
@@ -143,14 +143,14 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   xSemaphoreCAN1 = osSemaphoreNew(10, 0, NULL);
-  xLEDSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
+  xSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
 
-  if (xSemaphoreCAN1 == NULL || xLEDSemaphoreCAN2 == NULL) Error_Handler();
+  if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
 
   ledContextCAN1.led = &led_can1;
   ledContextCAN1.semaphore = xSemaphoreCAN1;
   ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xLEDSemaphoreCAN2;
+  ledContextCAN2.semaphore = xSemaphoreCAN2;
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -188,7 +188,7 @@ int main(void)
   ledContextCAN1.timer = xHeartbeatTimerCAN1;
 
   ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xLEDSemaphoreCAN2;
+  ledContextCAN2.semaphore = xSemaphoreCAN2;
   ledContextCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END 3 */
 

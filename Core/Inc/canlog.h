@@ -27,8 +27,8 @@
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
-extern osSemaphoreId_t xLEDSemaphoreCAN1;
-extern osSemaphoreId_t xLEDSemaphoreCAN2;
+extern osSemaphoreId_t xSemaphoreCAN1;
+extern osSemaphoreId_t xSemaphoreCAN2;
 
 /* USER CODE BEGIN PTD */
 typedef struct {

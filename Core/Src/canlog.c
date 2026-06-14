@@ -111,7 +111,7 @@ void vCANLoggerListen(void *argument)
     {
         if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
         {
-            osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xLEDSemaphoreCAN2 );
+            osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2 );
             // TODO: use this semaphore
         }
 
@@ -129,16 +129,16 @@ void vCANLoggerListen(void *argument)
 void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
-  LEDContext *ctx = (LEDContext*)argument;
+  LEDContext *context = (LEDContext*)argument;
 
-  if (osSemaphoreAcquire(ctx->sem, 0U) == osOK)
+  if (osSemaphoreAcquire(context->semaphore, 0U) == osOK)
   {
-      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_SET);
-      osTimerStart(ctx->timer, 25U);
+      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
+      osTimerStart(context->timer, 25U);
   }
   else
   {
-      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
   }
   /* CODE END */
 }
