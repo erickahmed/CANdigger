@@ -112,7 +112,9 @@ void vCANLoggerListen(void *argument)
         if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
         {
             // TODO: parse message send message to serial/uart
-            // TODO: add rtos semaphore to blink the LED with the timer already set
+
+            HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_SET);
+            osTimerStart(xHeartbeatTimerCAN1, 25U);
         }
     }
     /* CODE END */
