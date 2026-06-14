@@ -79,8 +79,6 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
-void vCANLoggerListen(void *argument);
-void vLEDHeartbeat(void *argument);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
