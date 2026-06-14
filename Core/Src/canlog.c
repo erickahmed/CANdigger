@@ -133,7 +133,17 @@ void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
   LED_Config *led = (LED_Config*)argument;
-  HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+
+  if (osSemaphoreAcquire(xCanActivitySemaphore, 0U) == osOK)
+  {
+      HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
+      osTimerStart(xHeartbeatTimerCAN1, 25U);
+  }
+  else
+  {
+      HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+  }
+
   /* CODE END */
 }
 /* END vLEDHeartbeat */
