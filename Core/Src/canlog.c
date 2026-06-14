@@ -111,9 +111,8 @@ void vCANLoggerListen(void *argument)
     {
         if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
         {
-            // TODO: parse message send message to serial/uart
-
-            osSemaphoreRelease( (hcan->Instance == CAN1) ? xLEDSemaphoreCAN1 : xLEDSemaphoreCAN2 );
+            osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xLEDSemaphoreCAN2 );
+            // TODO: use this semaphore
         }
 
     }
