@@ -30,11 +30,27 @@ extern osMessageQueueId_t xCAN2RxQueue;
 extern osSemaphoreId_t xLEDSemaphoreCAN1;
 extern osSemaphoreId_t xLEDSemaphoreCAN2;
 
+/* USER CODE BEGIN PTD */
+typedef struct {
+    GPIO_TypeDef* port;
+    uint16_t       pin;
+} LED_Config;
+
+typedef struct {
+    uint32_t id;
+    uint8_t  payload[8];
+    uint8_t  dlc;
+    uint8_t  isExtended;
+    //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
+    // this is for getting timestamps on can messages
+} CanMessage_t;
+
 typedef struct {
     LED_Config *led;
     osSemaphoreId_t semaphore;
     osTimerId_t timer;
 } LEDContext;
+/* USER CODE END PTD */
 
 /**
   * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
