@@ -113,9 +113,7 @@ void vCANLoggerListen(void *argument)
         {
             // TODO: parse message send message to serial/uart
 
-
-            bus = (hcan->Instance == CAN1) ? xLEDSemaphoreCAN1 : xLEDSemaphoreCAN2
-            osSemaphoreRelease(bus);
+            osSemaphoreRelease( (hcan->Instance == CAN1) ? xLEDSemaphoreCAN1 : xLEDSemaphoreCAN2 );
         }
 
     }
