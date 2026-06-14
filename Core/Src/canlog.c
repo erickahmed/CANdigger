@@ -55,6 +55,9 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 
     if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
     if (HAL_CAN_Start(hcan2) != HAL_OK) Error_Handler();
+
+    if (HAL_CAN_ActivateNotification(hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
+    if (HAL_CAN_ActivateNotification(hcan2, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
 }
 /* END CAN_Logger_Init */
 
