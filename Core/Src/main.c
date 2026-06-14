@@ -162,8 +162,8 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xLEDSemaphoreCAN1 = osSemaphoreNew(255, 0, NULL);
-  xLEDSemaphoreCAN2 = osSemaphoreNew(255, 0, NULL);
+  xLEDSemaphoreCAN1 = osSemaphoreNew(10, 0, NULL);
+  xLEDSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
 
   if (xLEDSemaphoreCAN1 == NULL || xLEDSemaphoreCAN2 == NULL) Error_Handler();
   /* USER CODE END RTOS_SEMAPHORES */
