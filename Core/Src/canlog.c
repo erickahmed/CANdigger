@@ -113,9 +113,11 @@ void vCANLoggerListen(void *argument)
         {
             // TODO: parse message send message to serial/uart
 
-            HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_SET);
-            osTimerStart(xHeartbeatTimerCAN1, 25U);
+
+            bus = (hcan->Instance == CAN1) ? xLEDSemaphoreCAN1 : xLEDSemaphoreCAN2
+            osSemaphoreRelease(bus);
         }
+
     }
     /* CODE END */
 }
