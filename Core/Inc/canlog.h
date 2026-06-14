@@ -23,28 +23,25 @@
 #define CANLOG_H
 
 #include "main.h"
+#include "cmsis_os.h"
 
-/* Decladerations for queues */
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
+extern osSemaphoreId_t xLEDSemaphoreCAN1;
+extern osSemaphoreId_t xLEDSemaphoreCAN2;
 
-/* Decladerations for thread handles and attributes */
-extern osThreadId_t vCAN1_rx;
-extern osThreadId_t vCAN2_rx;
-extern osThreadId_t vLED_CAN1_Heartbeat;
-extern osThreadId_t vLED_CAN2_Heartbeat;
-
-extern const osThreadAttr_t vCAN1_rx_attributes;
-extern const osThreadAttr_t vCAN2_rx_attributes;
-extern const osThreadAttr_t vLED_CAN1_Heartbeat_attributes;
-extern const osThreadAttr_t vLED_CAN2_Heartbeat_attributes;
+typedef struct {
+    LED_Config *led;
+    osSemaphoreId_t semaphore;
+    osTimerId_t timer;
+} LEDContext;
 
 /**
   * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
   * @param  hcan1 Pointer to the CAN1 handle
   * @param  hcan2 Pointer to the CAN2 handle
   */
-void vCANLoggerInit(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2);
+void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2);
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void vCANLoggerListen(void *argument);
 void vLEDHeartbeat(void *argument);

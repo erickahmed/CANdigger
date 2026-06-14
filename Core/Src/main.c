@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "canlog.h"
-#include <system_error>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,8 +65,17 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
+LEDContext ledContextCAN1;
+LEDContext ledContextCAN2;
+
+osSemaphoreId_t xLEDSemaphoreCAN1;
+osSemaphoreId_t xLEDSemaphoreCAN2;
+
 osTimerId_t xHeartbeatTimerCAN1;
 osTimerId_t xHeartbeatTimerCAN2;
+
+osMessageQueueId_t xCAN1RxQueue;
+osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,24 +155,32 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  xLEDSemaphoreCAN1 = osSemaphoreNew(10, 0, NULL);
+  xLEDSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
+
+  if (xLEDSemaphoreCAN1 == NULL || xLEDSemaphoreCAN2 == NULL) Error_Handler();
+
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN1.semaphore = xLEDSemaphoreCAN1;
+  ledContextCAN2.led = &led_can2;
+  ledContextCAN2.semaphore = xLEDSemaphoreCAN2;
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can1, NULL);
-  osTimerStart(xHeartbeatTimerCAN1, 250U);
+  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN1, NULL);
+  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN2, NULL);
 
-  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can2, NULL);
-  osTimerStart(xHeartbeatTimerCAN2, 250U);
+  osTimerStart(xHeartbeatTimerCAN1, 25U);
+  osTimerStart(xHeartbeatTimerCAN2, 25U);
 
   if (xHeartbeatTimerCAN1 == NULL || xHeartbeatTimerCAN2 == NULL) Error_Handler();
+
+  ledContextCAN1.timer = xHeartbeatTimerCAN1;
+  ledContextCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  osMessageQueueId_t xCAN1RxQueue;
   xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
-
-  osMessageQueueId_t xCAN2RxQueue;
   xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
@@ -179,6 +195,16 @@ int main(void)
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
+  /* USER CODE BEGIN 3 */
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN1.semaphore = xLEDSemaphoreCAN1;
+  ledContextCAN1.timer = xHeartbeatTimerCAN1;
+
+  ledContextCAN2.led = &led_can2;
+  ledContextCAN2.semaphore = xLEDSemaphoreCAN2;
+  ledContextCAN2.timer = xHeartbeatTimerCAN2;
+  /* USER CODE END 3 */
+
   /* Start scheduler */
   osKernelStart();
 
@@ -190,9 +216,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 4 */
   }
-  /* USER CODE END 3 */
+  /* USER CODE END 4 */
 }
 
 /**
@@ -442,9 +468,9 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 5 */
 
-/* USER CODE END 4 */
+/* USER CODE END 5 */
 
 /**
   * @brief  Period elapsed callback in non blocking mode

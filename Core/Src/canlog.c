@@ -82,12 +82,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     memcpy(message.payload, data, rxHeader.DLC);
 
     osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
-    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK) Error_Handler();
-    // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
+    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK)
+    {
+        // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
 
-    // Issue #1: set an event flag for led task
-    // osEventFlagsSet(xCanEventFlags, (hcan->Instance == CAN1) ? 0x01 : 0x02);
-
+        // send errors like queue full via UART
+    }
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
@@ -109,11 +109,13 @@ void vCANLoggerListen(void *argument)
 
     for (;;)
     {
-        if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK)
+        if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
         {
             // TODO: parse message send message to serial/uart
-            // TODO: add rtos semaphore to blink the LED with the timer already set
+
+            osSemaphoreRelease( (hcan->Instance == CAN1) ? xLEDSemaphoreCAN1 : xLEDSemaphoreCAN2 );
         }
+
     }
     /* CODE END */
 }
@@ -128,8 +130,17 @@ void vCANLoggerListen(void *argument)
 void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
-  LED_Config *led = (LED_Config*)argument;
-  HAL_GPIO_TogglePin(led->port, led->pin);
+  LEDContext *ctx = (LEDContext*)argument;
+
+  if (osSemaphoreAcquire(ctx->sem, 0U) == osOK)
+  {
+      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_SET);
+      osTimerStart(ctx->timer, 25U);
+  }
+  else
+  {
+      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_RESET);
+  }
   /* CODE END */
 }
 /* END vLEDHeartbeat */
