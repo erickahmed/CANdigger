@@ -215,9 +215,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 4 */
   }
-  /* USER CODE END 3 */
+  /* USER CODE END 4 */
 }
 
 /**
@@ -467,9 +467,9 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 5 */
 
-/* USER CODE END 4 */
+/* USER CODE END 5 */
 
 /**
   * @brief  Period elapsed callback in non blocking mode
