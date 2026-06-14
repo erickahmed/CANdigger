@@ -159,8 +159,13 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  QueueHandle_t xCAN1rxQueue;
-  QueueHandle_t xCAN2rxQueue;
+  osMessageQueueId_t xCAN1RxQueue;
+  xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+
+  osMessageQueueId_t xCAN2RxQueue;
+  xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+
+  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */

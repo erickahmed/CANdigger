@@ -24,6 +24,10 @@
 
 #include "main.h"
 
+/* Decladerations for queues */
+extern osMessageQueueId_t xCAN1RxQueue;
+extern osMessageQueueId_t xCAN2RxQueue;
+
 /* Decladerations for thread handles and attributes */
 extern osThreadId_t vCAN1_rx;
 extern osThreadId_t vCAN2_rx;
