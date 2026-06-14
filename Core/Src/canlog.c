@@ -130,16 +130,16 @@ void vCANLoggerListen(void *argument)
 void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
-  LED_Config *led = (LED_Config*)argument;
+  LEDContext *ctx = (LEDContext*)argument;
 
-  if (osSemaphoreAcquire(xCanActivitySemaphore, 0U) == osOK)
+  if (osSemaphoreAcquire(ctx->sem, 0U) == osOK)
   {
-      HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
-      osTimerStart(xHeartbeatTimerCAN1, 25U);
+      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_SET);
+      osTimerStart(ctx->timer, 25U);
   }
   else
   {
-      HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(ctx->led->port, ctx->led->pin, GPIO_PIN_RESET);
   }
   /* CODE END */
 }
