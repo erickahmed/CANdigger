@@ -10,3 +10,4 @@ Core/Src/Backup/
 Core/Inc/Backup/
 .bak
 .gitignore
+can_logger Debug.launch

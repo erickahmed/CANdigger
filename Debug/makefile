@@ -65,8 +65,8 @@ all: main-build
 main-build: can_logger.elf secondary-outputs
 
 # Tool invocations
-can_logger.elf can_logger.map: $(OBJS) $(USER_OBJS) /Users/erickahmed/Library/Mobile\ Documents/com~apple~CloudDocs/Engineering/Ingegneria\ del\ Veicolo\ LT/3T\ -\ Prova\ Finale/Tesi/code/can_logger/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "can_logger.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/erickahmed/Library/Mobile Documents/com~apple~CloudDocs/Engineering/Ingegneria del Veicolo LT/3T - Prova Finale/Tesi/code/can_logger/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="can_logger.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+can_logger.elf can_logger.map: $(OBJS) $(USER_OBJS) /Users/erickahmed/TESI/Tesi/can_logger/STM32F405RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "can_logger.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/erickahmed/TESI/Tesi/can_logger/STM32F405RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="can_logger.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

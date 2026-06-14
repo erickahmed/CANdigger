@@ -5,13 +5,10 @@
   * @brief          : Main program body
   ******************************************************************************
   * @attention
-  *
   * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
+  * Copyright (c) 2026 Erick Ahmed.
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * SPDX-License-Identifier: GPL-3.0-or-later
   *
   ******************************************************************************
   */
