@@ -163,6 +163,9 @@ int main(void)
   xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &led_can1, NULL);
   xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &led_can2, NULL);
 
+  osTimerStart(xHeartbeatTimerCAN1, 25U);
+  osTimerStart(xHeartbeatTimerCAN2, 25U);
+
   if (xHeartbeatTimerCAN1 == NULL || xHeartbeatTimerCAN2 == NULL) Error_Handler();
   /* USER CODE END RTOS_TIMERS */
 
