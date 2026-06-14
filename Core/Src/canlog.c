@@ -58,13 +58,13 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 }
 /* END CAN_Logger_Init */
 
-/* BEGIN vCAN_Logger_Listen */
+/* BEGIN vCANLoggerListen */
 /**
   * @brief  Log incoming CAN bus traffic in FIFO buffer
   * @param  argument: Not used
   * @retval None
   */
-void vCAN_Logger_Listen(void *argument)
+void vCANLoggerListen(void *argument)
 {
     /* CODE BEGIN */
     /* Infinite loop */
@@ -74,20 +74,20 @@ void vCAN_Logger_Listen(void *argument)
     }
     /* CODE END */
 }
-/* END vCAN_Logger_Listen */
+/* END vCANLoggerListen */
 
-/* BEGIN vLED_Heartbeat */
+/* BEGIN vLEDHeartbeat */
 /**
   * @brief  Blink a LED in heartbeat mode when CAN traffic is detected
   * @param  argument: LED GPIO (port and pin)
   * @retval None
   */
-void vLED_Heartbeat(void *argument)
+void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
   LED_Config *led = (LED_Config*)argument;
   HAL_GPIO_TogglePin(led->port, led->pin);
   /* CODE END */
 }
-/* END vLED_HeartbeatOnCanRx */
+/* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */

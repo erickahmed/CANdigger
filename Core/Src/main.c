@@ -32,6 +32,15 @@ typedef struct {
     GPIO_TypeDef* port;
     uint16_t       pin;
 } LED_Config;
+
+typedef struct {
+    uint32_t id;
+    uint8_t  payload[8];
+    uint8_t  dlc;
+    uint8_t  isExtended;
+    //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
+    // this is for getting timestamps on can messages
+} CanMessage_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -57,8 +66,8 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
-osTimerId_t heartbeat_timer_can1;
-osTimerId_t heartbeat_timer_can2;
+osTimerId_t xHeartbeatTimerCAN1;
+osTimerId_t xHeartbeatTimerCAN2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,8 +79,8 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
-void vCAN_Logger_Listen(void *argument);
-void vLED_Heartbeat(void *argument);
+void vCANLoggerListen(void *argument);
+void vLEDHeartbeat(void *argument);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -114,7 +123,6 @@ int main(void)
   MX_SDIO_SD_Init();
 
   /* USER CODE BEGIN 2 */
-  /* Initialize CAN1 and CAN2 */
   CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
 
@@ -122,15 +130,15 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_TASKS */
-  osThreadId_t vCAN1_rx;
-  const osThreadAttr_t vCAN1_rx_attributes = {
-    .name = "vCAN1_rx",
+  osThreadId_t xCAN1rx;
+  const osThreadAttr_t CAN1rxAttributes = {
+    .name = "CAN1rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
-  osThreadId_t vCAN2_rx;
-  const osThreadAttr_t vCAN2_rx_attributes = {
-    .name = "vCAN2_rx",
+  osThreadId_t xCAN2rx;
+  const osThreadAttr_t CAN2rxAttributes = {
+    .name = "CAN2rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
   };
@@ -145,20 +153,21 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  heartbeat_timer_can1 = osTimerNew(vLED_Heartbeat, osTimerPeriodic, &led_can1, NULL);
-  if (heartbeat_timer_can1 != NULL) osTimerStart(heartbeat_timer_can1, 250U);
+  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can1, NULL);
+  if (xHeartbeatTimerCAN1 != NULL) osTimerStart(xHeartbeatTimerCAN1, 250U);
 
-  heartbeat_timer_can2 = osTimerNew(vLED_Heartbeat, osTimerPeriodic, &led_can2, NULL);
-  if (heartbeat_timer_can2 != NULL) osTimerStart(heartbeat_timer_can2, 250U);
+  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can2, NULL);
+  if (xHeartbeatTimerCAN2 != NULL) osTimerStart(xHeartbeatTimerCAN2, 250U);
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+  QueueHandle_t xCAN1rxQueue;
+  QueueHandle_t xCAN2rxQueue;
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  vCAN1_rx = osThreadNew(vCAN_Logger_Listen, &hcan1, &vCAN1_rx_attributes);
-  vCAN2_rx = osThreadNew(vCAN_Logger_Listen, &hcan2, &vCAN2_rx_attributes);
+  xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
+  xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
