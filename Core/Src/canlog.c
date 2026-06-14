@@ -141,7 +141,6 @@ void vLEDHeartbeat(void *argument)
   {
       HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
   }
-
   /* CODE END */
 }
 /* END vLEDHeartbeat */

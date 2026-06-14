@@ -41,6 +41,12 @@ typedef struct {
     //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
     // this is for getting timestamps on can messages
 } CanMessage_t;
+
+typedef struct {
+    LED_Config *led;
+    osSemaphoreId_t sem;
+    osTimerId_t timer;
+} LEDContext;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -65,6 +71,9 @@ DMA_HandleTypeDef hdma_sdio_tx;
 LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
+
+LEDContext ledCtxCAN1;
+LEDContext ledCtxCAN2;
 
 osSemaphoreId_t xLEDSemaphoreCAN1;
 osSemaphoreId_t xLEDSemaphoreCAN2;
@@ -109,7 +118,13 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  ledCtxCAN1.led = &led_can1;
+  ledCtxCAN1.sem = xLEDSemaphoreCAN1;
+  ledCtxCAN1.timer = xHeartbeatTimerCAN1;
 
+  ledCtxCAN2.led = &led_can2;
+  ledCtxCAN2.sem = xLEDSemaphoreCAN2;
+  ledCtxCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END Init */
 
   /* Configure the system clock */
