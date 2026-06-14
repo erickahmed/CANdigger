@@ -101,10 +101,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void vCANLoggerListen(void *argument)
 {
     /* CODE BEGIN */
-    /* Infinite loop */
-    for(;;)
+    CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
+    osMessageQueueId_t queue;
+    CanMessage_t message;
+
+    queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+
+    for (;;)
     {
-      osDelay(1);
+        if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK)
+        {
+            // TODO: parse message send message to serial/uart
+            // TODO: add rtos semaphore to blink the LED with the timer already set
+        }
     }
     /* CODE END */
 }
