@@ -82,12 +82,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     memcpy(message.payload, data, rxHeader.DLC);
 
     osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
-    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK) Error_Handler();
-    // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
+    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK)
+    {
+        // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
 
-    // Issue #1: set an event flag for led task
-    // osEventFlagsSet(xCanEventFlags, (hcan->Instance == CAN1) ? 0x01 : 0x02);
-
+        // send errors like queue full via UART
+    }
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
