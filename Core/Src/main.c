@@ -118,13 +118,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  ledCtxCAN1.led = &led_can1;
-  ledCtxCAN1.sem = xLEDSemaphoreCAN1;
-  ledCtxCAN1.timer = xHeartbeatTimerCAN1;
 
-  ledCtxCAN2.led = &led_can2;
-  ledCtxCAN2.sem = xLEDSemaphoreCAN2;
-  ledCtxCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -199,6 +193,16 @@ int main(void)
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
+
+  /* USER CODE BEGIN 3 */
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN1.semaphore = xLEDSemaphoreCAN1;
+  ledContextCAN1.timer = xHeartbeatTimerCAN1;
+
+  ledContextCAN2.led = &led_can2;
+  ledContextCAN2.semaphore = xLEDSemaphoreCAN2;
+  ledContextCAN2.timer = xHeartbeatTimerCAN2;
+  /* USER CODE END 3 */
 
   /* Start scheduler */
   osKernelStart();
