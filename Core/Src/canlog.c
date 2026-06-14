@@ -109,7 +109,7 @@ void vCANLoggerListen(void *argument)
 
     for (;;)
     {
-        if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK)
+        if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
         {
             // TODO: parse message send message to serial/uart
             // TODO: add rtos semaphore to blink the LED with the timer already set
