@@ -152,10 +152,12 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_TIMERS */
   xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can1, NULL);
-  if (xHeartbeatTimerCAN1 != NULL) osTimerStart(xHeartbeatTimerCAN1, 250U);
+  osTimerStart(xHeartbeatTimerCAN1, 250U);
 
   xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerPeriodic, &led_can2, NULL);
-  if (xHeartbeatTimerCAN2 != NULL) osTimerStart(xHeartbeatTimerCAN2, 250U);
+  osTimerStart(xHeartbeatTimerCAN2, 250U);
+
+  if (xHeartbeatTimerCAN1 == NULL || xHeartbeatTimerCAN2 == NULL) Error_Handler();
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
