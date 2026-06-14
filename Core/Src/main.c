@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "canlog.h"
-#include <system_error>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

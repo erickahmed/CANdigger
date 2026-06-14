@@ -23,6 +23,7 @@
 #define CANLOG_H
 
 #include "main.h"
+#include "cmsis_os.h"
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
