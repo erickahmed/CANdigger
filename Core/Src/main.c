@@ -44,7 +44,7 @@ typedef struct {
 
 typedef struct {
     LED_Config *led;
-    osSemaphoreId_t sem;
+    osSemaphoreId_t semaphore;
     osTimerId_t timer;
 } LEDContext;
 /* USER CODE END PTD */
@@ -72,8 +72,8 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
-LEDContext ledCtxCAN1;
-LEDContext ledCtxCAN2;
+LEDContext ledContextCAN1;
+LEDContext ledContextCAN2;
 
 osSemaphoreId_t xLEDSemaphoreCAN1;
 osSemaphoreId_t xLEDSemaphoreCAN2;
@@ -175,8 +175,8 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &led_can1, NULL);
-  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &led_can2, NULL);
+  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN1, NULL);
+  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN2, NULL);
 
   osTimerStart(xHeartbeatTimerCAN1, 25U);
   osTimerStart(xHeartbeatTimerCAN2, 25U);
