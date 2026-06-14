@@ -147,7 +147,13 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  osSemaphoreId_t xLEDSemaphoreCAN1;
+  xLEDSemaphoreCAN1 = osSemaphoreNew(255, 0, NULL);
+
+  osSemaphoreId_t xLEDSemaphoreCAN2;
+  xLEDSemaphoreCAN2 = osSemaphoreNew(255, 0, NULL);
+
+  if (xLEDSemaphoreCAN1 == NULL || xLEDSemaphoreCAN2 == NULL) Error_Handler();
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
