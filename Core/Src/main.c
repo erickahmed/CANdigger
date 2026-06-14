@@ -66,8 +66,14 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
+osSemaphoreId_t xLEDSemaphoreCAN1;
+osSemaphoreId_t xLEDSemaphoreCAN2;
+
 osTimerId_t xHeartbeatTimerCAN1;
 osTimerId_t xHeartbeatTimerCAN2;
+
+osMessageQueueId_t xCAN1RxQueue;
+osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,10 +153,7 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  osSemaphoreId_t xLEDSemaphoreCAN1;
   xLEDSemaphoreCAN1 = osSemaphoreNew(255, 0, NULL);
-
-  osSemaphoreId_t xLEDSemaphoreCAN2;
   xLEDSemaphoreCAN2 = osSemaphoreNew(255, 0, NULL);
 
   if (xLEDSemaphoreCAN1 == NULL || xLEDSemaphoreCAN2 == NULL) Error_Handler();
@@ -164,10 +167,7 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  osMessageQueueId_t xCAN1RxQueue;
   xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
-
-  osMessageQueueId_t xCAN2RxQueue;
   xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
