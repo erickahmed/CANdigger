@@ -168,8 +168,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
   xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
-  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
-  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
@@ -177,6 +175,8 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
   xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
+  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
+  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
