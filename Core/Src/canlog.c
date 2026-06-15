@@ -47,14 +47,11 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 
     filter.FilterBank = 0;
     if (HAL_CAN_ConfigFilter(hcan1, &filter) != HAL_OK) Error_Handler();
+    if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
+
     filter.FilterBank = 14;
     if (HAL_CAN_ConfigFilter(hcan2, &filter) != HAL_OK) Error_Handler();
-
-    if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
     if (HAL_CAN_Start(hcan2) != HAL_OK) Error_Handler();
-
-    if (HAL_CAN_ActivateNotification(hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
-    if (HAL_CAN_ActivateNotification(hcan2, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
 }
 /* END CAN_Logger_Init */
 
@@ -102,12 +99,10 @@ void vCANLoggerListen(void *argument)
 {
   /* CODE BEGIN */
   CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
-  osMessageQueueId_t queue;
+  osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
   CanMessage_t message;
 
-  CAN_Logger_Init(&hcan1, &hcan2);
-
-  queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+  HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
   for (;;)
   {
