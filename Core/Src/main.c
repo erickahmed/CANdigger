@@ -35,11 +35,20 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+//CCRAM: stack; control bank; queue memory
 __attribute__((section(".ccmram")))
 StackType_t xCAN1_Stack[CAN_TASK_STACK_WORDS];
+__attribute__((section(".ccmram"), aligned(4)))
+uint8_t can1_queue_cb[osMessageQueueGetMemSize(CAN_QUEUE_DEPTH, CAN_MSG_SIZE)];
+__attribute__((section(".ccmram"), aligned(4)))
+uint8_t can1_queue_mq[CAN_QUEUE_DEPTH * CAN_MSG_SIZE];
 
 __attribute__((section(".ccmram")))
 StackType_t xCAN2_Stack[CAN_TASK_STACK_WORDS];
+__attribute__((section(".ccmram"), aligned(4)))
+uint8_t can2_queue_cb[osMessageQueueGetMemSize(CAN_QUEUE_DEPTH, CAN_MSG_SIZE)];
+__attribute__((section(".ccmram"), aligned(4)))
+uint8_t can2_queue_mq[CAN_QUEUE_DEPTH * CAN_MSG_SIZE];
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
