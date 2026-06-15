@@ -111,7 +111,7 @@ void vCANLoggerListen(void *argument)
 	{
 	  if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
 	    {
-	      osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2 );
+					//
 	    }
 	}
 	/* CODE END */
