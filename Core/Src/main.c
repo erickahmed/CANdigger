@@ -33,7 +33,11 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+__attribute__((section(".ccmram")))
+StackType_t xCAN1_Stack[CAN_TASK_STACK_WORDS];
 
+__attribute__((section(".ccmram")))
+StackType_t xCAN2_Stack[CAN_TASK_STACK_WORDS];
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
