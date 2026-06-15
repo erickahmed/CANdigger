@@ -131,14 +131,20 @@ int main(void)
   osThreadId_t xCAN2rx;
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
-    .stack_size = 128 * 4,
+    .cb_mem = NULL,
+    .cb_size = 0U,
+    .stack_mem = xCAN1_Stack,
+    .stack_size = sizeof(xCAN1_Stack),
     .priority = (osPriority_t) osPriorityRealtime,
   };
 
   osThreadId_t xLEDHeartbeatCAN1;
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
-    .stack_size = 128 * 4,
+    .cb_mem = NULL,
+    .cb_size = 0U,
+    .stack_mem = xCAN2_Stack,
+    .stack_size = sizeof(xCAN2_Stack),
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
