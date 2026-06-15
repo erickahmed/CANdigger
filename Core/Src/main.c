@@ -110,7 +110,6 @@ int main(void)
   MX_SDIO_SD_Init();
 
   /* USER CODE BEGIN 2 */
-  CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -185,6 +184,7 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* USER CODE BEGIN 3 */
+  CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 3 */
 
   /* Start scheduler */
