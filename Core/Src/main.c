@@ -188,8 +188,24 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  xCAN1RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), NULL);
-  xCAN2RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), NULL);
+  const osMessageQueueAttr_t can1_queue_attr = {
+      .name = "CAN1_Q",
+      .cb_mem = can1_queue_cb,
+      .cb_size = sizeof(can1_queue_cb),
+      .mq_mem = can1_queue_mq,
+      .mq_size = sizeof(can1_queue_mq)
+  };
+
+  const osMessageQueueAttr_t can2_queue_attr = {
+      .name = "CAN2_Q",
+      .cb_mem = can2_queue_cb,
+      .cb_size = sizeof(can2_queue_cb),
+      .mq_mem = can2_queue_mq,
+      .mq_size = sizeof(can2_queue_mq)
+  };
+
+  xCAN1RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), &can1_queue_attr);
+  xCAN2RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), &can2_queue_attr);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
