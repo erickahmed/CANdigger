@@ -136,7 +136,7 @@ int main(void)
   osThreadId_t xCAN1rx;
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
-    .stack_size = 128 * 4,
+    .stack_size = sizeof(xCAN1_Stack),
     .priority = (osPriority_t) osPriorityRealtime1,
   };
 
@@ -156,7 +156,7 @@ int main(void)
     .cb_mem = NULL,
     .cb_size = 0U,
     .stack_mem = xCAN2_Stack,
-    .stack_size = sizeof(xCAN2_Stack),
+    .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
