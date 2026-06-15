@@ -101,19 +101,21 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void vCANLoggerListen(void *argument)
 {
   /* CODE BEGIN */
-	CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
-	osMessageQueueId_t queue;
-    CanMessage_t message;
+  CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
+  osMessageQueueId_t queue;
+  CanMessage_t message;
 
-	queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+  CAN_Logger_Init(&hcan1, &hcan2);
 
-	for (;;)
+  queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+
+  for (;;)
+  {
+    if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
 	{
-	  if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-	    {
 					//
-	    }
 	}
+  }
 	/* CODE END */
 }
 /* END vCANLoggerListen */
