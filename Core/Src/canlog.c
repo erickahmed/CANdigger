@@ -85,6 +85,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
         // send errors like queue full via UART
     }
+
+    osSemaphoreId_t semaphore = (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2;
+    osSemaphoreRelease(semaphore);
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
