@@ -8,4 +8,6 @@
 .metadata
 Core/Src/Backup/
 Core/Inc/Backup/
-Debug
+.bak
+.gitignore
+can_logger Debug.launch

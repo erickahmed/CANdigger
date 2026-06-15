@@ -5,30 +5,25 @@
   * @brief          : Main program body
   ******************************************************************************
   * @attention
-  *
   * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
+  * Copyright (c) 2026 Erick Ahmed.
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * SPDX-License-Identifier: GPL-3.0-or-later
   *
   ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "canlog.h"
 #include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "canlog.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -50,7 +45,21 @@ DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
 /* USER CODE BEGIN PV */
+LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
+LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
+LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
+LEDContext ledContextCAN1;
+LEDContext ledContextCAN2;
+
+osSemaphoreId_t xSemaphoreCAN1;
+osSemaphoreId_t xSemaphoreCAN2;
+
+osTimerId_t xHeartbeatTimerCAN1;
+osTimerId_t xHeartbeatTimerCAN2;
+
+osMessageQueueId_t xCAN1RxQueue;
+osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +71,6 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,39 +111,83 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_SDIO_SD_Init();
+
   /* USER CODE BEGIN 2 */
-
-  // Initialize CAN1 and CAN2
   CAN_Logger_Init(&hcan1, &hcan2);
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_TASKS */
+  osThreadId_t xCAN1rx;
+  const osThreadAttr_t CAN1rxAttributes = {
+    .name = "CAN1rx",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityRealtime1,
+  };
+  osThreadId_t xCAN2rx;
+  const osThreadAttr_t CAN2rxAttributes = {
+    .name = "CAN2rx",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityRealtime,
+  };
+  /* USER END RTOS_TASKS */
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  xSemaphoreCAN1 = osSemaphoreNew(10, 0, NULL);
+  xSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
+
+  if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
+
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN1.semaphore = xSemaphoreCAN1;
+  ledContextCAN2.led = &led_can2;
+  ledContextCAN2.semaphore = xSemaphoreCAN2;
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
+  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN1, NULL);
+  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN2, NULL);
+
+  osTimerStart(xHeartbeatTimerCAN1, 25U);
+  osTimerStart(xHeartbeatTimerCAN2, 25U);
+
+  if (xHeartbeatTimerCAN1 == NULL || xHeartbeatTimerCAN2 == NULL) Error_Handler();
+
+  ledContextCAN1.timer = xHeartbeatTimerCAN1;
+  ledContextCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+  xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+  xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+
+  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+  xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
+  xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
+
+  /* USER CODE BEGIN 3 */
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN1.semaphore = xSemaphoreCAN1;
+  ledContextCAN1.timer = xHeartbeatTimerCAN1;
+
+  ledContextCAN2.led = &led_can2;
+  ledContextCAN2.semaphore = xSemaphoreCAN2;
+  ledContextCAN2.timer = xHeartbeatTimerCAN2;
+  /* USER CODE END 3 */
 
   /* Start scheduler */
   osKernelStart();
@@ -148,9 +200,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 4 */
   }
-  /* USER CODE END 3 */
+  /* USER CODE END 4 */
 }
 
 /**
@@ -222,7 +274,7 @@ static void MX_CAN1_Init(void)
   hcan1.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
-  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoWakeUp = ENABLE;
   hcan1.Init.AutoRetransmission = DISABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
@@ -259,7 +311,7 @@ static void MX_CAN2_Init(void)
   hcan2.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan2.Init.TimeTriggeredMode = DISABLE;
   hcan2.Init.AutoBusOff = DISABLE;
-  hcan2.Init.AutoWakeUp = DISABLE;
+  hcan2.Init.AutoWakeUp = ENABLE;
   hcan2.Init.AutoRetransmission = DISABLE;
   hcan2.Init.ReceiveFifoLocked = DISABLE;
   hcan2.Init.TransmitFifoPriority = DISABLE;
@@ -400,11 +452,9 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 5 */
 
-/* USER CODE END 4 */
-
-
+/* USER CODE END 5 */
 
 /**
   * @brief  Period elapsed callback in non blocking mode
@@ -437,8 +487,24 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+
+  //TODO: check if it is necessary to stop FreeRTOS
+
+  uint32_t error_code_can1;
+  uint32_t error_code_can2;
+
+  if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY) error_code_can1 = HAL_CAN_GetError(&hcan1);
+  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code_can2 = HAL_CAN_GetError(&hcan2);
+
+  // TODO: write error to SD and/or serial
+
+  HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led_can2.port, led_can2.pin, GPIO_PIN_RESET);
+
   while (1)
   {
+    HAL_GPIO_TogglePin(led_error.port, led_error.pin);
+    HAL_Delay(250);
   }
   /* USER CODE END Error_Handler_Debug */
 }
