@@ -97,23 +97,21 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   */
 void vCANLoggerListen(void *argument)
 {
-    /* CODE BEGIN */
-    CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
-    osMessageQueueId_t queue;
+  /* CODE BEGIN */
+	CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
+	osMessageQueueId_t queue;
     CanMessage_t message;
 
-    queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+	queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
 
-    for (;;)
-    {
-        if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-        {
-            osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2 );
-            // TODO: use this semaphore
-        }
-
-    }
-    /* CODE END */
+	for (;;)
+	{
+	  if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
+	    {
+	      osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2 );
+	    }
+	}
+	/* CODE END */
 }
 /* END vCANLoggerListen */
 
@@ -125,19 +123,15 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-  /* CODE BEGIN */
-  LEDContext *context = (LEDContext*)argument;
+    /* CODE BEGIN */
+    LEDContext *context = (LEDContext*)argument;
 
-  if (osSemaphoreAcquire(context->semaphore, 0U) == osOK)
-  {
-      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-      osTimerStart(context->timer, 25U);
-  }
-  else
-  {
-      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
-  }
-  /* CODE END */
+    for (;;)
+    {
+      if (osSemaphoreAcquire(context->semaphore, 25U) == osOK) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
+      else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
+    }
+    /* CODE END */
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */

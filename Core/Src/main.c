@@ -55,9 +55,6 @@ LEDContext ledContextCAN2;
 osSemaphoreId_t xSemaphoreCAN1;
 osSemaphoreId_t xSemaphoreCAN2;
 
-osTimerId_t xHeartbeatTimerCAN1;
-osTimerId_t xHeartbeatTimerCAN2;
-
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
@@ -126,11 +123,26 @@ int main(void)
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
+
   osThreadId_t xCAN2rx;
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
+  };
+
+  osThreadId_t xLEDHeartbeatCAN1;
+  const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
+    .name = "LED_HB_CAN1",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityVeryLow1,
+  };
+
+  osThreadId_t xLEDHeartbeatCAN2;
+  const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
+    .name = "LED_HB_CAN2",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t) osPriorityVeryLow,
   };
   /* USER END RTOS_TASKS */
 
@@ -139,8 +151,8 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreCAN1 = osSemaphoreNew(10, 0, NULL);
-  xSemaphoreCAN2 = osSemaphoreNew(10, 0, NULL);
+  xSemaphoreCAN1 = osSemaphoreNew(32, 0, NULL);
+  xSemaphoreCAN2 = osSemaphoreNew(32, 0, NULL);
 
   if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
 
@@ -151,21 +163,14 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  xHeartbeatTimerCAN1 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN1, NULL);
-  xHeartbeatTimerCAN2 = osTimerNew(vLEDHeartbeat, osTimerOnce, &ledContextCAN2, NULL);
-
-  osTimerStart(xHeartbeatTimerCAN1, 25U);
-  osTimerStart(xHeartbeatTimerCAN2, 25U);
-
-  if (xHeartbeatTimerCAN1 == NULL || xHeartbeatTimerCAN2 == NULL) Error_Handler();
-
-  ledContextCAN1.timer = xHeartbeatTimerCAN1;
-  ledContextCAN2.timer = xHeartbeatTimerCAN2;
+  /* add timers, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
   xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
+  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
@@ -180,13 +185,6 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* USER CODE BEGIN 3 */
-  ledContextCAN1.led = &led_can1;
-  ledContextCAN1.semaphore = xSemaphoreCAN1;
-  ledContextCAN1.timer = xHeartbeatTimerCAN1;
-
-  ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xSemaphoreCAN2;
-  ledContextCAN2.timer = xHeartbeatTimerCAN2;
   /* USER CODE END 3 */
 
   /* Start scheduler */
