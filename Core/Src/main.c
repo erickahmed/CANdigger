@@ -30,6 +30,7 @@
 /* USER CODE BEGIN PD */
 #define CAN_QUEUE_DEPTH 32
 #define CAN_TASK_STACK_WORDS 128
+#define CAN_QUEUE_CB_SIZE 128
 #define CAN_MSG_SIZE sizeof(CanMessage_t)
 /* USER CODE END PD */
 
@@ -39,14 +40,14 @@
 __attribute__((section(".ccmram")))
 StackType_t xCAN1_Stack[CAN_TASK_STACK_WORDS];
 __attribute__((section(".ccmram"), aligned(4)))
-uint8_t can1_queue_cb[osMessageQueueGetMemSize(CAN_QUEUE_DEPTH, CAN_MSG_SIZE)];
+uint8_t can1_queue_cb[CAN_QUEUE_CB_SIZE];
 __attribute__((section(".ccmram"), aligned(4)))
 uint8_t can1_queue_mq[CAN_QUEUE_DEPTH * CAN_MSG_SIZE];
 
 __attribute__((section(".ccmram")))
 StackType_t xCAN2_Stack[CAN_TASK_STACK_WORDS];
 __attribute__((section(".ccmram"), aligned(4)))
-uint8_t can2_queue_cb[osMessageQueueGetMemSize(CAN_QUEUE_DEPTH, CAN_MSG_SIZE)];
+uint8_t can2_queue_cb[CAN_QUEUE_CB_SIZE];
 __attribute__((section(".ccmram"), aligned(4)))
 uint8_t can2_queue_mq[CAN_QUEUE_DEPTH * CAN_MSG_SIZE];
 /* USER CODE END PM */
@@ -144,8 +145,8 @@ int main(void)
     .name = "CAN2rx",
     .cb_mem = NULL,
     .cb_size = 0U,
-    .stack_mem = xCAN1_Stack,
-    .stack_size = sizeof(xCAN1_Stack),
+    .stack_mem = xCAN2_Stack,
+    .stack_size = sizeof(xCAN2_Stack),
     .priority = (osPriority_t) osPriorityRealtime,
   };
 
