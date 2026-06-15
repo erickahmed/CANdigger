@@ -45,7 +45,6 @@ typedef struct {
 typedef struct {
     LED_Config *led;
     osSemaphoreId_t semaphore;
-    osTimerId_t timer;
 } LEDContext;
 /* USER CODE END PTD */
 

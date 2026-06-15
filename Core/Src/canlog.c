@@ -47,14 +47,11 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 
     filter.FilterBank = 0;
     if (HAL_CAN_ConfigFilter(hcan1, &filter) != HAL_OK) Error_Handler();
+    if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
+
     filter.FilterBank = 14;
     if (HAL_CAN_ConfigFilter(hcan2, &filter) != HAL_OK) Error_Handler();
-
-    if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
     if (HAL_CAN_Start(hcan2) != HAL_OK) Error_Handler();
-
-    if (HAL_CAN_ActivateNotification(hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
-    if (HAL_CAN_ActivateNotification(hcan2, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
 }
 /* END CAN_Logger_Init */
 
@@ -85,6 +82,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
         // send errors like queue full via UART
     }
+
+    osSemaphoreId_t semaphore = (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2;
+    osSemaphoreRelease(semaphore);
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
@@ -97,23 +97,21 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   */
 void vCANLoggerListen(void *argument)
 {
-    /* CODE BEGIN */
-    CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
-    osMessageQueueId_t queue;
-    CanMessage_t message;
+  /* CODE BEGIN */
+  CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
+  osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+  CanMessage_t message;
 
-    queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+  HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
-    for (;;)
-    {
-        if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-        {
-            osSemaphoreRelease( (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2 );
-            // TODO: use this semaphore
-        }
-
-    }
-    /* CODE END */
+  for (;;)
+  {
+    if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
+	{
+					//
+	}
+  }
+	/* CODE END */
 }
 /* END vCANLoggerListen */
 
@@ -125,19 +123,15 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-  /* CODE BEGIN */
-  LEDContext *context = (LEDContext*)argument;
+    /* CODE BEGIN */
+    LEDContext *context = (LEDContext*)argument;
 
-  if (osSemaphoreAcquire(context->semaphore, 0U) == osOK)
-  {
-      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-      osTimerStart(context->timer, 25U);
-  }
-  else
-  {
-      HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
-  }
-  /* CODE END */
+    for (;;)
+    {
+      if (osSemaphoreAcquire(context->semaphore, 25U) == osOK) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
+      else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
+    }
+    /* CODE END */
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */
