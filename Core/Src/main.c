@@ -28,7 +28,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define CAN_QUEUE_DEPTH 32
+#define CAN_TASK_STACK_WORDS 128
+#define CAN_MSG_SIZE sizeof(CanMessage_t)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -161,8 +163,8 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreCAN1 = osSemaphoreNew(32, 0, NULL);
-  xSemaphoreCAN2 = osSemaphoreNew(32, 0, NULL);
+  xSemaphoreCAN1 = osSemaphoreNew(CAN_QUEUE_DEPTH, 0, NULL);
+  xSemaphoreCAN2 = osSemaphoreNew(CAN_QUEUE_DEPTH, 0, NULL);
 
   if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
 
@@ -177,8 +179,8 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
-  xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+  xCAN1RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), NULL);
+  xCAN2RxQueue = osMessageQueueNew(CAN_QUEUE_DEPTH, sizeof(CanMessage_t), NULL);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
