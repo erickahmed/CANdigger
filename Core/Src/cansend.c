@@ -22,6 +22,10 @@
 #include "canlog.h"
 /* USER CODE END Includes */
 
+extern UART_HandleTypeDef huart1;
+extern osSemaphoreId_t xUARTDMASemaphore;
+extern osMessageQueueId_t xUARTQueue;
+
 /* BEGIN format_can_message */
 /**
   * @brief  Format CAN message for friendly reading on terminal emulators and other MCUs.
