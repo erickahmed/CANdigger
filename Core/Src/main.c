@@ -52,6 +52,11 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
+osThreadId_t xCAN1rxTask;
+osThreadId_t xCAN2rxTask;
+osThreadId_t xCAN1LedTask;
+osThreadId_t xCAN2LedTask;
+
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
 osMessageQueueId_t xUARTQueue;
@@ -120,14 +125,13 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_TASKS */
-  osThreadId_t xCAN1rxTask;
+
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
 
-  osThreadId_t xCAN2rxTask;
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
     .stack_size = 128 * 4,
@@ -140,14 +144,12 @@ int main(void)
     .priority = (osPriority_t) osPriorityVeryHigh,
   };
 
-  osThreadId_t xCAN1LedTask;
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
-  osThreadId_t xCAN2LedTask;
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
