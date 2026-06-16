@@ -20,6 +20,48 @@
 #include "cmsis_os.h"
 /* USER CODE END Includes */
 
+static void format_can_message(char *buf, uint8_t source, const CanMessage_t *msg)
+{
+  const char hex[] = "0123456789ABCDEF";
+
+  buf[0] = 'C';
+  buf[1] = (source == 1) ? '1' : '2';
+  buf[2] = ':';
+
+  buf[3]  = hex[(msg->id >> 28) & 0x0F];
+  buf[4]  = hex[(msg->id >> 24) & 0x0F];
+  buf[5]  = hex[(msg->id >> 20) & 0x0F];
+  buf[6]  = hex[(msg->id >> 16) & 0x0F];
+  buf[7]  = hex[(msg->id >> 12) & 0x0F];
+  buf[8]  = hex[(msg->id >> 8) & 0x0F];
+  buf[9]  = hex[(msg->id >> 4) & 0x0F];
+  buf[10] = hex[msg->id & 0x0F];
+
+  buf[11] = ' ';
+  buf[12] = hex[(msg->dlc >> 4) & 0x0F];
+  buf[13] = hex[msg->dlc & 0x0F];
+  buf[14] = ' ';
+
+  int idx = 15;
+  for (int i = 0; i < 8; i++)
+  {
+    if (i < msg->dlc)
+    {
+      buf[idx++] = hex[(msg->payload[i] >> 4) & 0x0F];
+      buf[idx++] = hex[msg->payload[i] & 0x0F];
+    }
+    else
+    {
+      buf[idx++] = ' ';
+      buf[idx++] = ' ';
+    }
+    if (i < 7) buf[idx++] = ' ';
+  }
+
+  buf[idx++] = '\r';
+  buf[idx++] = '\n';
+}
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
