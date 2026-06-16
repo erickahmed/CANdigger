@@ -49,7 +49,7 @@ typedef struct {
 
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2);
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
-void vCANLoggerListen(void *argument);
+void vCANListener(void *argument);
 void vLEDHeartbeat(void *argument);
 
 #endif /* CANLOG_H */

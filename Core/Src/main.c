@@ -177,8 +177,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  xCAN1rxTask = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
-  xCAN2rxTask = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
+  xCAN1rxTask = osThreadNew(vCANListener, &hcan1, &CAN1rxAttributes);
+  xCAN2rxTask = osThreadNew(vCANListener, &hcan2, &CAN2rxAttributes);
   xUartTask = osThreadNew(vUARTLogger, NULL, &UartLoggerAttributes);
   xCAN1LedTask = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
   xCAN2LedTask = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);

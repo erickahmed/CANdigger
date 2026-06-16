@@ -100,13 +100,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
 
-/* BEGIN vCANLoggerListen */
+/* BEGIN vCANListener */
 /**
   * @brief  Log incoming CAN bus traffic in FIFO buffer
   * @param  argument: Not used
   * @retval None
   */
-void vCANLoggerListen(void *argument)
+void vCANListener(void *argument)
 {
   CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
   osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
@@ -125,7 +125,7 @@ void vCANLoggerListen(void *argument)
       }
   }
 }
-/* END vCANLoggerListen */
+/* END vCANListener */
 
 /* BEGIN vLEDHeartbeat */
 /**
