@@ -130,14 +130,14 @@ void vCANLoggerListen(void *argument)
 void vLEDHeartbeat(void *argument)
 {
   /* CODE BEGIN */
-  LEDContext *context = (LEDContext*)argument;
+  LED_Config *led = (LED_Config*)argument;
 
   for (;;)
   {
     uint32_t ret = osThreadFlagsWait(0x01, osFlagsWaitAny, 25U);
 
-    if (ret & 0x01) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-    else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
+    if (ret & 0x01) HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
+    else HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
   }
   /* CODE END */
 }

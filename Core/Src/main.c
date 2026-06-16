@@ -51,9 +51,6 @@ LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
-LEDContext ledContextCAN1;
-LEDContext ledContextCAN2;
-
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
@@ -167,11 +164,8 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
   xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
-  xLedTaskCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
-  xLedTaskCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
-
-  ledContextCAN1.led = &led_can1;
-  ledContextCAN2.led = &led_can2;
+  xLedTaskCAN1 = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
+  xLedTaskCAN2 = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -190,7 +184,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  /* USER CODE END 3 */
+    /* USER CODE END 3 */
+  }
 }
 
 /**
@@ -475,7 +470,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 /* USER CODE END 4 */
-
 
 /**
   * @brief  Period elapsed callback in non blocking mode

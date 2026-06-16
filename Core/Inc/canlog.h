@@ -24,8 +24,6 @@
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
-extern osSemaphoreId_t xSemaphoreCAN1;
-extern osSemaphoreId_t xSemaphoreCAN2;
 
 /* USER CODE BEGIN PTD */
 typedef struct {
@@ -41,10 +39,6 @@ typedef struct {
     //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
     // this is for getting timestamps on can messages
 } CanMessage_t;
-
-typedef struct {
-    LED_Config *led;
-} LEDContext;
 /* USER CODE END PTD */
 
 /**
