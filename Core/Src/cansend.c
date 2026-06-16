@@ -29,7 +29,7 @@ extern osMessageQueueId_t xUARTQueue;
 /* BEGIN format_can_message */
 /**
   * @brief  Format CAN message for friendly reading on terminal emulators and other MCUs.
-  * @param  arguments: buffer, sourse, message
+  * @param  arguments: buffer, source, message
   * @retval None
   */
 static void format_can_message(char *buf, uint8_t source, const CanMessage_t *message)
