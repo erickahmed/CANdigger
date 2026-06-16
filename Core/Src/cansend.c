@@ -94,6 +94,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void vUARTLogger(void *argument)
 {
+  CanMessage_t msg;
+  char tx_buffer[45]; // converted extended frame
+  bool queues_empty;
 
+  for (;;)
+  {
+    osEventFlagsWait(xCanEventFlags, 0x03, osFlagsWaitAny, osWaitForever);
+
+  }
 }
 /* END vUARTLoggerListen */
