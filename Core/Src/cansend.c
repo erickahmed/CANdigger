@@ -105,7 +105,7 @@ void vUARTLogger(void *argument)
     {
       if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
       {
-        format_can_message(tx_buffer, message.source, &message); // Assuming you add 'source' to the struct
+        format_can_message(tx_buffer, message.source, &message);
         HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
         osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
       }
