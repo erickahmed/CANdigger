@@ -85,9 +85,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
   {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    osSemaphoreReleaseFromISR(xUARTDMASemaphore, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    osSemaphoreRelease(xUARTDMASemaphore);
   }
 }
 /* END HAL_UART_TxCpltCallback */
