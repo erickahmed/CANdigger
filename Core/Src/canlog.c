@@ -99,6 +99,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
     if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
     {
+        osEventFlagsSet(xCanEventFlags, flag);
         osThreadFlagsSet(led_task, 0x01);
     }
     else
@@ -129,7 +130,6 @@ void vCANLoggerListen(void *argument)
   {
     if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
 	{
-      osEventFlagsSet(xCanEventFlags, flag);
 	}
   }
 	/* CODE END */
