@@ -24,6 +24,9 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
+extern osThreadId_t xLedTaskCAN1;
+extern osThreadId_t xLedTaskCAN2;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 /* BEGIN CAN_Logger_Init */
@@ -76,15 +79,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     memcpy(message.payload, data, rxHeader.DLC);
 
     osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
-    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK)
+    if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
+    {
+      if (hcan->Instance == CAN1) osThreadFlagsSet(xLedTaskCAN1, 0x01);
+      else osThreadFlagsSet(xLedTaskCAN2, 0x01);
+    }
+    else
     {
         // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
 
         // send errors like queue full via UART
     }
-
-    osSemaphoreId_t semaphore = (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2;
-    osSemaphoreRelease(semaphore);
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
@@ -126,12 +131,14 @@ void vLEDHeartbeat(void *argument)
     /* CODE BEGIN */
     LEDContext *context = (LEDContext*)argument;
 
-    for (;;)
-    {
-      if (osSemaphoreAcquire(context->semaphore, 25U) == osOK) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-      else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
-    }
-    /* CODE END */
+  for (;;)
+  {
+    uint32_t ret = osThreadFlagsWait(0x01, osFlagsWaitAny, 25U);
+
+    if (ret & 0x01) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
+    else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
+  }
+  /* CODE END */
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */

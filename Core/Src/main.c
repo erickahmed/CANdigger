@@ -54,9 +54,6 @@ LED_Config led_error = {GPIOB, GPIO_PIN_3};
 LEDContext ledContextCAN1;
 LEDContext ledContextCAN2;
 
-osSemaphoreId_t xSemaphoreCAN1;
-osSemaphoreId_t xSemaphoreCAN2;
-
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
 /* USER CODE END PV */
@@ -134,14 +131,14 @@ int main(void)
     .priority = (osPriority_t) osPriorityRealtime,
   };
 
-  osThreadId_t xLEDHeartbeatCAN1;
+  osThreadId_t xLedTaskCAN1;
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
-  osThreadId_t xLEDHeartbeatCAN2;
+  osThreadId_t xLedTaskCAN2;
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
@@ -154,15 +151,6 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreCAN1 = osSemaphoreNew(32, 0, NULL);
-  xSemaphoreCAN2 = osSemaphoreNew(32, 0, NULL);
-
-  if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
-
-  ledContextCAN1.led = &led_can1;
-  ledContextCAN1.semaphore = xSemaphoreCAN1;
-  ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xSemaphoreCAN2;
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -179,8 +167,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
   xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
-  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
-  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
+  xLedTaskCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
+  xLedTaskCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
+
+  ledContextCAN1.led = &led_can1;
+  ledContextCAN2.led = &led_can2;
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -483,7 +474,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-  }
 /* USER CODE END 4 */
 
 
