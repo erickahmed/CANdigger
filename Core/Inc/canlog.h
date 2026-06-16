@@ -28,6 +28,7 @@
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
+extern osMessageQueueId_t xUARTQueue;
 
 /* USER CODE BEGIN PTD */
 typedef struct {
@@ -40,6 +41,7 @@ typedef struct {
     uint8_t  payload[8];
     uint8_t  dlc;
     uint8_t  isExtended;
+    uint8_t  source;
     //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
     // this is for getting timestamps on can messages
 } CanMessage_t;

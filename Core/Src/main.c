@@ -54,10 +54,11 @@ LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
+osMessageQueueId_t xUARTQueue;
 
-osEventFlagsId_t xCanEventFlags;
 osSemaphoreId_t xUARTDMASemaphore;
 osThreadId_t xUartTask;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -168,8 +169,9 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
   xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+  xUARTQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
 
-  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
+  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL || xUARTQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -181,8 +183,6 @@ int main(void)
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-  xCanEventFlags = osEventFlagsNew(NULL);
-  if (xCanEventFlags == NULL) Error_Handler();
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */

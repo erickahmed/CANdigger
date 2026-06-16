@@ -27,8 +27,6 @@ extern CAN_HandleTypeDef hcan2;
 extern osThreadId_t xCAN1LedTask;
 extern osThreadId_t xCAN2LedTask;
 
-extern osEventFlagsId_t xCanEventFlags;
-
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 /**
@@ -82,6 +80,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     message.id = rxHeader.ExtId;
     message.dlc = rxHeader.DLC;
     message.isExtended = (rxHeader.IDE == CAN_ID_EXT);
+    message.source = (hcan->Instance == CAN1) ? 1 : 2;
     memcpy(message.payload, data, rxHeader.DLC);
 
     if (hcan->Instance == CAN1)
@@ -99,16 +98,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
     if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
     {
-        osEventFlagsSet(xCanEventFlags, flag);
         osThreadFlagsSet(led_task, 0x01);
     }
-    else
-    {
-        // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
-
-        // send errors like queue full via UART
-    }
-    /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
 
@@ -128,11 +119,14 @@ void vCANLoggerListen(void *argument)
 
   for (;;)
   {
-    if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-	{
-	}
+      if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
+      {
+          // J1939 decoding
+
+          // RELAY: Push to the UART queue
+          osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
+      }
   }
-	/* CODE END */
 }
 /* END vCANLoggerListen */
 
@@ -153,7 +147,6 @@ void vLEDHeartbeat(void *argument)
     if (notification & 0x01) HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
     else HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
   }
-  /* CODE END */
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */

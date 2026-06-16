@@ -17,7 +17,9 @@
 #include "cansend.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "main.h"
 #include "cmsis_os.h"
+#include "canlog.h"
 /* USER CODE END Includes */
 
 /* BEGIN format_can_message */
@@ -80,7 +82,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   if (huart->Instance == USART1)
   {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    osSemaphoreReleaseFromISR(xUartDmaSem, &xHigherPriorityTaskWoken);
+    osSemaphoreReleaseFromISR(xUARTDMASemaphore, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   }
 }
@@ -94,39 +96,17 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void vUARTLogger(void *argument)
 {
-  CanMessage_t message;
-  char tx_buffer[45]; // converted extended frame
-  bool queues_empty;
+    CanMessage_t msg;
+    char tx_buffer[45];
 
-  for (;;)
-  {
-    osEventFlagsWait(xCanEventFlags, 0x03, osFlagsWaitAny, osWaitForever);
-
-    do
+    for (;;)
     {
-      queues_empty = true;
-
-      if (osMessageQueueGet(xCAN1RxQueue, &message, NULL, 0U) == osOK)
+      if (osMessageQueueGet(xUARTQueue, &msg, NULL, osWaitForever) == osOK)
       {
-        format_can_message(tx_buffer, 1, &message);
-
+        format_can_message(tx_buffer, msg.source, &msg); // Assuming you add 'source' to the struct
         HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
-        osSemaphoreAcquire(xUartDmaSem, osWaitForever);
-
-        quesues_empty = false;
+        osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
       }
-      if (osMessageQueueGet(xCAN2RxQueue, &message, NULL, 0U) == osOK)
-      {
-        format_can_message(tx_buffer, 2, &message);
-
-        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
-        osSemaphoreAcquire(xUartDmaSem, osWaitForever);
-
-        queues_empty = false;
-      }
-
     }
-    while (!queues_empty);
-  }
 }
 /* END vUARTLoggerListen */

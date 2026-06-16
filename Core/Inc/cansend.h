@@ -20,6 +20,8 @@
 #ifndef CANSEND_H
 #define CANSEND_H
 
+#include "main.h"
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 void vUARTLogger(void *argument);
 
