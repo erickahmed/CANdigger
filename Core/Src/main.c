@@ -53,6 +53,10 @@ LED_Config led_error = {GPIOB, GPIO_PIN_3};
 
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
+
+osEventFlagsId_t xCanEventFlags;
+osSemaphoreId_t xUARTDMASemaphore;
+osThreadId_t xUartTask;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,28 +118,34 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_TASKS */
-  osThreadId_t xCAN1rx;
+  osThreadId_t xCAN1rxTask;
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
 
-  osThreadId_t xCAN2rx;
+  osThreadId_t xCAN2rxTask;
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
   };
 
-  osThreadId_t xLedTaskCAN1;
+  const osThreadAttr_t UartLoggerAttributes = {
+    .name = "UART_Logger",
+    .stack_size = 256 * 4,
+    .priority = (osPriority_t) osPriorityVeryHigh,
+  };
+
+  osThreadId_t xCAN1LedTask;
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
-  osThreadId_t xLedTaskCAN2;
+  osThreadId_t xCAN2LedTask;
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
@@ -147,6 +157,8 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
+  xUARTDMASemaphore = osSemaphoreNew(1, 0, NULL);
+  if (xUARTDMASemaphore == NULL) Error_Handler();
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -160,13 +172,16 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
-  xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
-  xLedTaskCAN1 = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
-  xLedTaskCAN2 = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
+  xCAN1rxTask = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
+  xCAN2rxTask = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
+  xUartTask = osThreadNew(vUARTLogger, NULL, &UartLoggerAttributes);
+  xCAN1LedTask = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
+  xCAN2LedTask = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
+  xCanEventFlags = osEventFlagsNew(NULL);
+  if (xCanEventFlags == NULL) Error_Handler();
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */

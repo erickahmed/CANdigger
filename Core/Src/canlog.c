@@ -24,8 +24,10 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
-extern osThreadId_t xLedTaskCAN1;
-extern osThreadId_t xLedTaskCAN2;
+extern osThreadId_t xCAN1LedTask;
+extern osThreadId_t xCAN2LedTask;
+
+extern osEventFlagsId_t xCanEventFlags;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -70,6 +72,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CanMessage_t message;
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t data[8];
+
+    osMessageQueueId_t queue;
+    uint32_t flag;
+    osThreadId_t led_task;
 
     // TODO: manage the case of FIFO overflow
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) return;
