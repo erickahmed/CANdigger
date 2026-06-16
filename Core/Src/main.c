@@ -20,6 +20,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "canlog.h"
+#include "cansend.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
