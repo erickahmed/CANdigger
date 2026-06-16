@@ -129,8 +129,8 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-    /* CODE BEGIN */
-    LEDContext *context = (LEDContext*)argument;
+  /* CODE BEGIN */
+  LEDContext *context = (LEDContext*)argument;
 
   for (;;)
   {
