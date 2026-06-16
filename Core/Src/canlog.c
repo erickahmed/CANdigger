@@ -31,10 +31,10 @@ extern osEventFlagsId_t xCanEventFlags;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-/* BEGIN CAN_Logger_Init */
 /**
-  * @brief  Initialize CAN bus logger.
-  * @param  argument: hcan1, hcan2
+  * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
+  * @param  hcan1 Pointer to the CAN1 handle
+  * @param  hcan2 Pointer to the CAN2 handle
   * @retval None
   */
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
@@ -63,7 +63,7 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 /* BEGIN HAL_CAN_RxFifo0MsgPendingCallback */
 /**
   * @brief  ISR for CAN message pending in FIFO0
-  * @param  argument: Can handle hcan (hcan1 or hcan2)
+  * @param  hcan: CAN handle hcan (hcan1 or hcan2)
   * @retval None
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
