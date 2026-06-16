@@ -138,17 +138,17 @@ int main(void)
   const osThreadAttr_t UartLoggerAttributes = {
     .name = "UART_Logger",
     .stack_size = 256 * 4,
-    .priority = (osPriority_t) osPriorityVeryHigh,
+    .priority = (osPriority_t) osPriorityHigh,
   };
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
-    .priority = (osPriority_t) osPriorityVeryLow1,
+    .priority = (osPriority_t) osPriorityLow1,
   };
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
-    .priority = (osPriority_t) osPriorityVeryLow,
+    .priority = (osPriority_t) osPriorityLow,
   };
   /* USER CODE END RTOS_TASKS */
 
