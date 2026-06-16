@@ -18,9 +18,13 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef CANLOG_H
 #define CANLOG_H
-
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define LED_BLINK_MS 25U
+/* USER CODE END PD */
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
