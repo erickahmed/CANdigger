@@ -20,5 +20,17 @@
 #include "cmsis_os.h"
 /* USER CODE END Includes */
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
-void vUARTLogger(void *argument);
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1)
+  {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    osSemaphoreReleaseFromISR(xUartDmaSem, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  }
+}
+
+void vUARTLogger(void *argument)
+{
+
+}
