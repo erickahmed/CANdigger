@@ -68,7 +68,6 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    /* CODE BEGIN */
     CanMessage_t message;
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t data[8];
@@ -121,7 +120,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   */
 void vCANLoggerListen(void *argument)
 {
-  /* CODE BEGIN */
   CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
   osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
   CanMessage_t message;
@@ -147,7 +145,6 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-  /* CODE BEGIN */
   LED_Config *led = (LED_Config*)argument;
 
   for (;;)
