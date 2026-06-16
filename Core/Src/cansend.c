@@ -94,7 +94,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void vUARTLogger(void *argument)
 {
-  CanMessage_t msg;
+  CanMessage_t message;
   char tx_buffer[45]; // converted extended frame
   bool queues_empty;
 
@@ -102,6 +102,21 @@ void vUARTLogger(void *argument)
   {
     osEventFlagsWait(xCanEventFlags, 0x03, osFlagsWaitAny, osWaitForever);
 
+    do
+    {
+      queues_empty = true;
+
+      if (osMessageQueueGet(xCAN1RxQueue, &message, NULL, 0U) == osOK)
+      {
+        format_can_message(tx_buffer, 1, &message);
+
+        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
+        osSemaphoreAcquire(xUartDmaSem, osWaitForever);
+
+        quesues_empty = false;
+      }
+    }
+    while (!queues_empty);
   }
 }
 /* END vUARTLoggerListen */
