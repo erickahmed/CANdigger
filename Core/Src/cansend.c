@@ -20,6 +20,12 @@
 #include "cmsis_os.h"
 /* USER CODE END Includes */
 
+/* BEGIN format_can_message */
+/**
+  * @brief  Format CAN message for friendly reading on terminal emulators and other MCUs.
+  * @param  arguments: buffer, sourse, message
+  * @retval None
+  */
 static void format_can_message(char *buf, uint8_t source, const CanMessage_t *msg)
 {
   const char hex[] = "0123456789ABCDEF";
@@ -61,7 +67,14 @@ static void format_can_message(char *buf, uint8_t source, const CanMessage_t *ms
   buf[idx++] = '\r';
   buf[idx++] = '\n';
 }
+/* END format_can_message */
 
+/* BEGIN HAL_UART_TxCpltCallback */
+/**
+  * @brief  Safely release UART semaphore inside ISR and yield task if possible.
+  * @param  argument: UART handle
+  * @retval None
+  */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART1)
@@ -71,8 +84,16 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   }
 }
+/* END HAL_UART_TxCpltCallback */
 
+/* BEGIN vUARTLoggerListen */
+/**
+  * @brief  Send CAN bus traffic saved in FIFO buffer to USART1
+  * @param  argument: Not used
+  * @retval None
+  */
 void vUARTLogger(void *argument)
 {
 
 }
+/* END vUARTLoggerListen */
