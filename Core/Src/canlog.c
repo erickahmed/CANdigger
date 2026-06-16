@@ -85,11 +85,23 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     message.isExtended = (rxHeader.IDE == CAN_ID_EXT);
     memcpy(message.payload, data, rxHeader.DLC);
 
-    osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
+    if (hcan->Instance == CAN1)
+    {
+        queue    = xCAN1RxQueue;
+        flag     = 0x01;
+        led_task = xCAN1LedTask;
+    }
+    else
+    {
+        queue    = xCAN2RxQueue;
+        flag     = 0x02;
+        led_task = xCAN2LedTask;
+    }
+
     if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
     {
-      if (hcan->Instance == CAN1) osThreadFlagsSet(xLedTaskCAN1, 0x01);
-      else osThreadFlagsSet(xLedTaskCAN2, 0x01);
+        osEventFlagsSet(xCanEventFlags, flag);
+        osThreadFlagsSet(led_task, 0x01);
     }
     else
     {
@@ -120,7 +132,7 @@ void vCANLoggerListen(void *argument)
   {
     if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
 	{
-					//
+
 	}
   }
 	/* CODE END */
