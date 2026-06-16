@@ -71,7 +71,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     uint8_t data[8];
 
     osMessageQueueId_t queue;
-    uint32_t flag;
     osThreadId_t led_task;
 
     // TODO: manage the case of FIFO overflow
@@ -86,13 +85,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     if (hcan->Instance == CAN1)
     {
         queue    = xCAN1RxQueue;
-        flag     = 0x01;
         led_task = xCAN1LedTask;
     }
     else
     {
         queue    = xCAN2RxQueue;
-        flag     = 0x02;
         led_task = xCAN2LedTask;
     }
 
