@@ -115,6 +115,16 @@ void vUARTLogger(void *argument)
 
         quesues_empty = false;
       }
+      if (osMessageQueueGet(xCAN2RxQueue, &message, NULL, 0U) == osOK)
+      {
+        format_can_message(tx_buffer, 2, &message);
+
+        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
+        osSemaphoreAcquire(xUartDmaSem, osWaitForever);
+
+        queues_empty = false;
+      }
+
     }
     while (!queues_empty);
   }
