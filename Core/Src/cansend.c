@@ -28,7 +28,7 @@
   * @param  arguments: buffer, sourse, message
   * @retval None
   */
-static void format_can_message(char *buf, uint8_t source, const CanMessage_t *msg)
+static void format_can_message(char *buf, uint8_t source, const CanMessage_t *message)
 {
   const char hex[] = "0123456789ABCDEF";
 
@@ -36,27 +36,27 @@ static void format_can_message(char *buf, uint8_t source, const CanMessage_t *ms
   buf[1] = (source == 1) ? '1' : '2';
   buf[2] = ':';
 
-  buf[3]  = hex[(msg->id >> 28) & 0x0F];
-  buf[4]  = hex[(msg->id >> 24) & 0x0F];
-  buf[5]  = hex[(msg->id >> 20) & 0x0F];
-  buf[6]  = hex[(msg->id >> 16) & 0x0F];
-  buf[7]  = hex[(msg->id >> 12) & 0x0F];
-  buf[8]  = hex[(msg->id >> 8) & 0x0F];
-  buf[9]  = hex[(msg->id >> 4) & 0x0F];
-  buf[10] = hex[msg->id & 0x0F];
+  buf[3]  = hex[(message->id >> 28) & 0x0F];
+  buf[4]  = hex[(message->id >> 24) & 0x0F];
+  buf[5]  = hex[(message->id >> 20) & 0x0F];
+  buf[6]  = hex[(message->id >> 16) & 0x0F];
+  buf[7]  = hex[(message->id >> 12) & 0x0F];
+  buf[8]  = hex[(message->id >> 8) & 0x0F];
+  buf[9]  = hex[(message->id >> 4) & 0x0F];
+  buf[10] = hex[message->id & 0x0F];
 
   buf[11] = ' ';
-  buf[12] = hex[(msg->dlc >> 4) & 0x0F];
-  buf[13] = hex[msg->dlc & 0x0F];
+  buf[12] = hex[(message->dlc >> 4) & 0x0F];
+  buf[13] = hex[message->dlc & 0x0F];
   buf[14] = ' ';
 
   int idx = 15;
   for (int i = 0; i < 8; i++)
   {
-    if (i < msg->dlc)
+    if (i < message->dlc)
     {
-      buf[idx++] = hex[(msg->payload[i] >> 4) & 0x0F];
-      buf[idx++] = hex[msg->payload[i] & 0x0F];
+      buf[idx++] = hex[(message->payload[i] >> 4) & 0x0F];
+      buf[idx++] = hex[message->payload[i] & 0x0F];
     }
     else
     {
@@ -96,14 +96,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void vUARTLogger(void *argument)
 {
-    CanMessage_t msg;
+    CanMessage_t message;
     char tx_buffer[45];
 
     for (;;)
     {
-      if (osMessageQueueGet(xUARTQueue, &msg, NULL, osWaitForever) == osOK)
+      if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
       {
-        format_can_message(tx_buffer, msg.source, &msg); // Assuming you add 'source' to the struct
+        format_can_message(tx_buffer, message.source, &message); // Assuming you add 'source' to the struct
         HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
         osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
       }
