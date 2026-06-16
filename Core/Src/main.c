@@ -125,31 +125,26 @@ int main(void)
   osKernelInitialize();
 
   /* USER CODE BEGIN RTOS_TASKS */
-
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
-
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
   };
-
   const osThreadAttr_t UartLoggerAttributes = {
     .name = "UART_Logger",
     .stack_size = 256 * 4,
     .priority = (osPriority_t) osPriorityVeryHigh,
   };
-
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
-
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
