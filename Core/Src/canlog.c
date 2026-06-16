@@ -24,6 +24,9 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
+extern osThreadId_t xLedTaskCAN1;
+extern osThreadId_t xLedTaskCAN2;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 /* BEGIN CAN_Logger_Init */
@@ -68,7 +71,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t data[8];
 
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) Error_Handler();
+    // TODO: manage the case of FIFO overflow
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) return;
 
     message.id = rxHeader.ExtId;
     message.dlc = rxHeader.DLC;
@@ -76,15 +80,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     memcpy(message.payload, data, rxHeader.DLC);
 
     osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
-    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK)
+    if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
+    {
+      if (hcan->Instance == CAN1) osThreadFlagsSet(xLedTaskCAN1, 0x01);
+      else osThreadFlagsSet(xLedTaskCAN2, 0x01);
+    }
+    else
     {
         // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
 
         // send errors like queue full via UART
     }
-
-    osSemaphoreId_t semaphore = (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2;
-    osSemaphoreRelease(semaphore);
     /* CODE END */
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
@@ -123,15 +129,17 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-    /* CODE BEGIN */
-    LEDContext *context = (LEDContext*)argument;
+  /* CODE BEGIN */
+  LED_Config *led = (LED_Config*)argument;
 
-    for (;;)
-    {
-      if (osSemaphoreAcquire(context->semaphore, 25U) == osOK) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-      else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
-    }
-    /* CODE END */
+  for (;;)
+  {
+    uint32_t notification = osThreadFlagsWait(0x01, osFlagsWaitAny, LED_BLINK_MS);
+
+    if (notification & 0x01) HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
+    else HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+  }
+  /* CODE END */
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */

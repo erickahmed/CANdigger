@@ -44,16 +44,12 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
 LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
 LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
 LED_Config led_error = {GPIOB, GPIO_PIN_3};
-
-LEDContext ledContextCAN1;
-LEDContext ledContextCAN2;
-
-osSemaphoreId_t xSemaphoreCAN1;
-osSemaphoreId_t xSemaphoreCAN2;
 
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
@@ -66,6 +62,7 @@ static void MX_DMA_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
+static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
@@ -108,7 +105,7 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_SDIO_SD_Init();
-
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
@@ -131,39 +128,28 @@ int main(void)
     .priority = (osPriority_t) osPriorityRealtime,
   };
 
-  osThreadId_t xLEDHeartbeatCAN1;
+  osThreadId_t xLedTaskCAN1;
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow1,
   };
 
-  osThreadId_t xLEDHeartbeatCAN2;
+  osThreadId_t xLedTaskCAN2;
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityVeryLow,
   };
-  /* USER END RTOS_TASKS */
+  /* USER CODE END RTOS_TASKS */
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreCAN1 = osSemaphoreNew(32, 0, NULL);
-  xSemaphoreCAN2 = osSemaphoreNew(32, 0, NULL);
-
-  if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
-
-  ledContextCAN1.led = &led_can1;
-  ledContextCAN1.semaphore = xSemaphoreCAN1;
-  ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xSemaphoreCAN2;
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* add timers, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -176,16 +162,12 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
   xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
-  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
-  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
+  xLedTaskCAN1 = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
+  xLedTaskCAN2 = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
-
-  /* USER CODE BEGIN 3 */
-  /* USER CODE END 3 */
 
   /* Start scheduler */
   osKernelStart();
@@ -198,9 +180,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 4 */
+    /* USER CODE BEGIN 3 */
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 4 */
 }
 
 /**
@@ -360,6 +342,39 @@ static void MX_SDIO_SD_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 1152000;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -418,12 +433,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3
                            PA4 PA5 PA6 PA7
-                           PA8 PA9 PA10 PA11
-                           PA12 PA13 PA14 PA15 */
+                           PA8 PA11 PA12 PA13
+                           PA14 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+                          |GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -450,9 +465,8 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* USER CODE BEGIN 5 */
-
-/* USER CODE END 5 */
+/* USER CODE BEGIN 4 */
+/* USER CODE END 4 */
 
 /**
   * @brief  Period elapsed callback in non blocking mode
