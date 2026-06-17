@@ -48,9 +48,9 @@ DMA_HandleTypeDef hdma_sdio_tx;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
-LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
-LED_Config led_error = {GPIOB, GPIO_PIN_3};
+LED_Config led_can1 = {GPIOB, GPIO_PIN_5};
+LED_Config led_can2 = {GPIOB, GPIO_PIN_6};
+LED_Config led_error = {GPIOB, GPIO_PIN_7};
 
 osThreadId_t xCAN1rxTask;
 osThreadId_t xCAN2rxTask;
