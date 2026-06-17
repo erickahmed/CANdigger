@@ -116,13 +116,13 @@ void vCANListener(void *argument)
 
   for (;;)
   {
-      if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-      {
+    if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
+    {
           // J1939 decoding
 
           // RELAY: Push to the UART queue
-          osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
-      }
+      osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
+    }
   }
 }
 /* END vCANListener */
