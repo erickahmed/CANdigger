@@ -24,6 +24,27 @@
 extern "C" {
 #endif
 
+/* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx_hal.h"
+#include "canlog.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <stdint.h>
+/* USER CODE END Includes */
+
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
+
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
 #define DEBUG
 #ifdef DEBUG
 static inline void ITM_Print(const char *str) {
