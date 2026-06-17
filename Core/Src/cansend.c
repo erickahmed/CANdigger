@@ -32,7 +32,7 @@ extern osMessageQueueId_t xUARTQueue;
   * @param  arguments: buffer, source, message
   * @retval None
   */
-static void format_can_message(char *buf, uint8_t source, const CanMessage_t *message)
+static int format_can_message(char *buf, uint8_t source, const CanMessage_t *message)
 {
   const char hex[] = "0123456789ABCDEF";
 
@@ -72,6 +72,9 @@ static void format_can_message(char *buf, uint8_t source, const CanMessage_t *me
 
   buf[idx++] = '\r';
   buf[idx++] = '\n';
+  buf[idx] = '\0';
+
+  return idx;
 }
 /* END format_can_message */
 
@@ -103,11 +106,14 @@ void vUARTLogger(void *argument)
 
     for (;;)
     {
+      DEBUG_PRINT("Waiting for CAN traffic...\r\n");
       if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
       {
+        DEBUG_PRINT("CAN frame detected\r\n");
         format_can_message(tx_buffer, message.source, &message);
-        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
+        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len);
         osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+        DEBUG_PRINT("CAN frame sent via UART\r\n");
       }
     }
 }

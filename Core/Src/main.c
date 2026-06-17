@@ -48,9 +48,9 @@ DMA_HandleTypeDef hdma_sdio_tx;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
-LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
-LED_Config led_error = {GPIOB, GPIO_PIN_3};
+LED_Config led_can1 = {GPIOB, GPIO_PIN_5};
+LED_Config led_can2 = {GPIOB, GPIO_PIN_6};
+LED_Config led_error = {GPIOB, GPIO_PIN_7};
 
 osThreadId_t xCAN1rxTask;
 osThreadId_t xCAN2rxTask;
@@ -76,6 +76,12 @@ static void MX_SDIO_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
+int _write(int file, char *ptr, int len) {
+ for (int i = 0; i < len; i++) {
+ ITM_SendChar((*ptr++));
+ }
+ return len;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -91,7 +97,11 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  ITM->LAR = 0xC5ACCE55;
+  ITM->TER = 1 << 0;
+  ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_SWOENA_Msk;
+  DEBUG_PRINT("Booting system\r\n");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -100,6 +110,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  DEBUG_PRINT("Configuring system clock\r\n");
 
   /* USER CODE END Init */
 
@@ -107,7 +118,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  DEBUG_PRINT("Initializing configured peripherals...\r\n");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -118,11 +129,14 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  DEBUG_PRINT("Initializing CAN bus logger\r\n");
   CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
+
+  DEBUG_PRINT("Creating RTOS entities\r\n");
 
   /* USER CODE BEGIN RTOS_TASKS */
   const osThreadAttr_t CAN1rxAttributes = {
@@ -183,6 +197,7 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
+  DEBUG_PRINT("Starting RTOS init scheduler\r\n");
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
@@ -194,6 +209,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    DEBUG_PRINT("ERROR: RTOS scheduler crashed!\r\n");
     /* USER CODE END 3 */
   }
 }
@@ -276,7 +292,7 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-
+  DEBUG_PRINT("CAN1 initialized!\r\n");
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -313,7 +329,7 @@ static void MX_CAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN2_Init 2 */
-
+  DEBUG_PRINT("CAN2 initialized!\r\n");
   /* USER CODE END CAN2_Init 2 */
 
 }
@@ -340,16 +356,16 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd.Init.ClockDiv = 0;
-  if (HAL_SD_Init(&hsd) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  //if (HAL_SD_Init(&hsd) != HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
+  //if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
   /* USER CODE BEGIN SDIO_Init 2 */
-
+  //DEBUG_PRINT("SDIO initialized!\r\n");
   /* USER CODE END SDIO_Init 2 */
 
 }
@@ -382,7 +398,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-
+  DEBUG_PRINT("USART1 initialized!\r\n");
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -404,6 +420,9 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 
+  /* USER CODE BEGIN MX_DMA_Init 1 */
+  DEBUG_PRINT("DMA initialized!\r\n");
+  /* USER CODE END MX_DMA_Init 1 */
 }
 
 /**
@@ -426,7 +445,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PC13 PC14 PC15 PC0
                            PC1 PC2 PC3 PC4
@@ -446,35 +465,33 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3
                            PA4 PA5 PA6 PA7
-                           PA8 PA11 PA12 PA13
-                           PA14 PA15 */
+                           PA8 PA11 PA12 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
-                          |GPIO_PIN_14|GPIO_PIN_15;
+                          |GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB1 PB2 PB10
-                           PB11 PB14 PB15 PB6
-                           PB7 */
+                           PB11 PB14 PB15 PB3
+                           PB4 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10
-                          |GPIO_PIN_11|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_6
-                          |GPIO_PIN_7;
+                          |GPIO_PIN_11|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_3
+                          |GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB3 PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  /*Configure GPIO pins : PB5 PB6 PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  DEBUG_PRINT("GPIO initialized!\r\n");
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -509,6 +526,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   */
 void Error_Handler(void)
 {
+  DEBUG_PRINT("ERROR: entering error handler\r\n");
+
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
