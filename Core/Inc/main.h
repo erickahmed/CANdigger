@@ -47,20 +47,10 @@ extern "C" {
 /* USER CODE BEGIN EM */
 #define DEBUG
 #ifdef DEBUG
-static inline void ITM_Print(const char *str) {
-    while (*str) {
-        uint32_t timeout = 1000;
-        while ((ITM->PORT[0].u32 == 0) && (timeout-- > 0));
-
-        if (timeout > 0) {
-            ITM->PORT[0].u8 = (uint8_t)(*str);
-        }
-        str++;
-    }
-}
-#define DEBUG_PRINT(x) ITM_Print(x)
+#include <stdio.h>
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #else
-#define DEBUG_PRINT(x)
+#define DEBUG_PRINT(...)
 #endif
 /* USER CODE END EM */
 

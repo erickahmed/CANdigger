@@ -76,6 +76,12 @@ static void MX_SDIO_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
+int _write(int file, char *ptr, int len) {
+ for (int i = 0; i < len; i++) {
+ ITM_SendChar((*ptr++));
+ }
+ return len;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
