@@ -103,11 +103,14 @@ void vUARTLogger(void *argument)
 
     for (;;)
     {
+      DEBUG_PRINT("Waiting for CAN traffic...\r\n");
       if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
       {
-        format_can_message(tx_buffer, message.source, &message); // Assuming you add 'source' to the struct
+        DEBUG_PRINT("CAN frame detected\r\n");
+        format_can_message(tx_buffer, message.source, &message);
         HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, 44);
         osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+        DEBUG_PRINT("CAN frame sent via UART\r\n");
       }
     }
 }
