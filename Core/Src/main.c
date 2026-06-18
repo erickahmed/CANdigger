@@ -79,13 +79,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 int _write(int file, char *ptr, int len)
 {
-  if ((CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) && (ITM->TCR & ITM_TCR_ITMENA_Msk))
-  {
-    for (int i = 0; i < len; i++)
-    {
-      ITM_SendChar((*ptr++));
-    }
-  }
+  for (int i = 0; i < len; i++) ITM_SendChar((*ptr++));
   return len;
 }
 /* USER CODE END PFP */
@@ -103,10 +97,14 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  ITM->LAR = 0xC5ACCE55;
-  ITM->TER = 1 << 0;
-  ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_SWOENA_Msk;
+  if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)
+  {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    ITM->LAR = 0xC5ACCE55;
+    ITM->TER = 1 << 0;
+    ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_SWOENA_Msk;
+  }
+
   DEBUG_PRINT("Booting system\r\n");
   /* USER CODE END 1 */
 
