@@ -104,9 +104,25 @@ void vUARTLogger(void *argument)
   CanMessage_t message;
   char tx_buffer[45];
 
+  #ifdef DEBUG_DUMMY_FRAME
+  CanMessage_t dummy_frame = {
+    .id = 0x0CF00400,       // J1939 EEC1 ID
+    .dlc = 8,               // 8 bytes of data
+    .isExtended = 1,        // 29-bit Extended ID
+    .source = 1,            // CAN1
+    .payload = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22}
+  };
+  #endif
+
   for (;;)
   {
     DEBUG_PRINT("Waiting for CAN traffic...\r\n");
+
+    #ifdef DEBUG_DUMMY_FRAME
+    osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
+    osDelay(1000);
+    #endif
+
     if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
     {
       osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
