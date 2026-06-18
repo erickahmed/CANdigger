@@ -119,11 +119,17 @@ void vUARTLogger(void *argument)
     DEBUG_PRINT("Waiting for CAN traffic...\r\n");
 
     #ifdef DEBUG_DUMMY_FRAME
+    #define uint32_t queue_timeout = 1000U;
+    #else
+    #define uint32_t queue_timeout = osWaitForever;
+    #endif
+
+    #ifdef DEBUG_DUMMY_FRAME
     osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
     osDelay(1000);
     #endif
 
-    if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
+    if (osMessageQueueGet(xUARTQueue, &message, NULL, queue_timeout) == osOK)
     {
       osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
       int len = format_can_message(tx_buffer, message.source, &message);
