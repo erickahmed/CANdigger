@@ -131,24 +131,25 @@ void vUARTLogger(void *argument)
 
    	if (osMessageQueueGet(xUARTQueue, &message, NULL, queue_timeout) == osOK)
 	{
-         if (osSemaphoreAcquire(xUARTDMASemaphore, queue_timeout) == osOK)
-         {
-             int len = format_can_message(tx_buffer, message.source, &message);
+      if (osSemaphoreAcquire(xUARTDMASemaphore, queue_timeout) == osOK)
+      {
+        int len = format_can_message(tx_buffer, message.source, &message);
 
-             if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
-             {
-               DEBUG_PRINT("CAN frame sent via UART\r\n");
-             }
-             else
-             {
-               osSemaphoreRelease(xUARTDMASemaphore);
-               DEBUG_PRINT("HAL error, CAN frame NOT sent!\r\n");
-             }
-         }
-         else
-         {
-             DEBUG_PRINT("ERROR: Semaphore timeout! UART might be stuck in BUSY state.\r\n");
-         }
-       }
+        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
+        {
+          DEBUG_PRINT("CAN frame sent via UART\r\n");
+        }
+        else
+        {
+          osSemaphoreRelease(xUARTDMASemaphore);
+          DEBUG_PRINT("HAL error, CAN frame NOT sent!\r\n");
+        }
+      }
+      else
+      {
+        DEBUG_PRINT("ERROR: Semaphore timeout! UART might be stuck in BUSY state.\r\n");
+      }
+	}
+  }
 }
 /* END vUARTLoggerListen */
