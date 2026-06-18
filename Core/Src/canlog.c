@@ -121,7 +121,6 @@ void vCANListener(void *argument)
     {
           // J1939 decoding
 
-          // RELAY: Push to the UART queue
       osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
     }
   }
