@@ -135,5 +135,6 @@ void vUARTLogger(void *argument)
         DEBUG_PRINT("CAN frame sent via UART\r\n");
       }
     }
+  }
 }
 /* END vUARTLoggerListen */
