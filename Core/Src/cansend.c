@@ -104,20 +104,24 @@ void vUARTLogger(void *argument)
   CanMessage_t message;
   char tx_buffer[45];
 
-    for (;;)
+  for (;;)
+  {
+    DEBUG_PRINT("Waiting for CAN traffic...\r\n");
+    if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
     {
-      DEBUG_PRINT("Waiting for CAN traffic...\r\n");
-      if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
+      osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+      int len = format_can_message(tx_buffer, message.source, &message);
+
+      if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
       {
-        DEBUG_PRINT("CAN frame detected\r\n");
-        int len = format_can_message(tx_buffer, message.source, &message);
-        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
-        {
-            osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
-            DEBUG_PRINT("CAN frame sent via UART\r\n");
-        }
-        else DEBUG_PRINT("HAL error, CAN frame NOT sent!\r\n");
+          DEBUG_PRINT("CAN frame sent via UART\r\n");
+      }
+      else
+      {
+        osSemaphoreRelease(xUARTDMASemaphore);
+        DEBUG_PRINT("HAL error, CAN frame NOT sent!\r\n");
       }
     }
+  }
 }
 /* END vUARTLoggerListen */
