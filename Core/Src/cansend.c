@@ -111,8 +111,10 @@ void vUARTLogger(void *argument)
       {
         DEBUG_PRINT("CAN frame detected\r\n");
         int len = format_can_message(tx_buffer, message.source, &message);
-        HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len);
-        osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
+        {
+            osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+        }
         DEBUG_PRINT("CAN frame sent via UART\r\n");
       }
     }
