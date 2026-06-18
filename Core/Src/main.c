@@ -176,7 +176,7 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xUARTDMASemaphore = osSemaphoreNew(1, 0, NULL);
+  xUARTDMASemaphore = osSemaphoreNew(1, 1, NULL);
   if (xUARTDMASemaphore == NULL) Error_Handler();
   /* USER CODE END RTOS_SEMAPHORES */
 
