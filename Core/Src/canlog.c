@@ -49,6 +49,12 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
     filter.FilterActivation = ENABLE;
     filter.SlaveStartFilterBank = 14;
 
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+
     filter.FilterBank = 0;
     if (HAL_CAN_ConfigFilter(hcan1, &filter) != HAL_OK) Error_Handler();
     if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
