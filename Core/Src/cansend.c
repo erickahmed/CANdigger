@@ -101,8 +101,8 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void vUARTLogger(void *argument)
 {
-    CanMessage_t message;
-    char tx_buffer[45];
+  CanMessage_t message;
+  char tx_buffer[45];
 
     for (;;)
     {
