@@ -46,6 +46,8 @@ extern "C" {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 #define DEBUG
+#define DEBUG_DUMMY_FRAME
+
 #ifdef DEBUG
 #include <stdio.h>
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
