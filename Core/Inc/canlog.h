@@ -18,14 +18,17 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef CANLOG_H
 #define CANLOG_H
-
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+#define LED_BLINK_MS 25U
+/* USER CODE END PD */
 
 extern osMessageQueueId_t xCAN1RxQueue;
 extern osMessageQueueId_t xCAN2RxQueue;
-extern osSemaphoreId_t xSemaphoreCAN1;
-extern osSemaphoreId_t xSemaphoreCAN2;
+extern osMessageQueueId_t xUARTQueue;
 
 /* USER CODE BEGIN PTD */
 typedef struct {
@@ -38,24 +41,15 @@ typedef struct {
     uint8_t  payload[8];
     uint8_t  dlc;
     uint8_t  isExtended;
+    uint8_t  source;
     //uint32_t timestamp; //Enable TIM2: 42 MHz / (41+1) = 1 MHz → 1 µs tick; 32bit autoreload freerunning
     // this is for getting timestamps on can messages
 } CanMessage_t;
-
-typedef struct {
-    LED_Config *led;
-    osSemaphoreId_t semaphore;
-} LEDContext;
 /* USER CODE END PTD */
 
-/**
-  * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
-  * @param  hcan1 Pointer to the CAN1 handle
-  * @param  hcan2 Pointer to the CAN2 handle
-  */
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2);
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
-void vCANLoggerListen(void *argument);
+void vCANListener(void *argument);
 void vLEDHeartbeat(void *argument);
 
 #endif /* CANLOG_H */

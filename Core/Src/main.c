@@ -20,6 +20,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "canlog.h"
+#include "cansend.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,19 +45,26 @@ SD_HandleTypeDef hsd;
 DMA_HandleTypeDef hdma_sdio_rx;
 DMA_HandleTypeDef hdma_sdio_tx;
 
+UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_tx;
+
 /* USER CODE BEGIN PV */
-LED_Config led_can1 = {GPIOB, GPIO_PIN_2};
-LED_Config led_can2 = {GPIOB, GPIO_PIN_5};
-LED_Config led_error = {GPIOB, GPIO_PIN_3};
+LED_Config led_can1 = {GPIOB, GPIO_PIN_5};
+LED_Config led_can2 = {GPIOB, GPIO_PIN_6};
+LED_Config led_error = {GPIOB, GPIO_PIN_7};
 
-LEDContext ledContextCAN1;
-LEDContext ledContextCAN2;
-
-osSemaphoreId_t xSemaphoreCAN1;
-osSemaphoreId_t xSemaphoreCAN2;
+osThreadId_t xCAN1rxTask;
+osThreadId_t xCAN2rxTask;
+osThreadId_t xCAN1LedTask;
+osThreadId_t xCAN2LedTask;
 
 osMessageQueueId_t xCAN1RxQueue;
 osMessageQueueId_t xCAN2RxQueue;
+osMessageQueueId_t xUARTQueue;
+
+osSemaphoreId_t xUARTDMASemaphore;
+osThreadId_t xUartTask;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,8 +74,14 @@ static void MX_DMA_Init(void);
 static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
+static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
+int _write(int file, char *ptr, int len)
+{
+  for (int i = 0; i < len; i++) ITM_SendChar((*ptr++));
+  return len;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -83,7 +97,15 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+  if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)
+  {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    ITM->LAR = 0xC5ACCE55;
+    ITM->TER = 1 << 0;
+    ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_SWOENA_Msk;
+  }
 
+  DEBUG_PRINT("Booting system\r\n");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -92,6 +114,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  DEBUG_PRINT("Configuring system clock\r\n");
 
   /* USER CODE END Init */
 
@@ -99,7 +122,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  DEBUG_PRINT("Initializing configured peripherals...\r\n");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -108,86 +131,77 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_SDIO_SD_Init();
-
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  DEBUG_PRINT("Initializing CAN bus logger\r\n");
   CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
 
+  DEBUG_PRINT("Creating RTOS entities\r\n");
+
   /* USER CODE BEGIN RTOS_TASKS */
-  osThreadId_t xCAN1rx;
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
-
-  osThreadId_t xCAN2rx;
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
     .stack_size = 128 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
   };
-
-  osThreadId_t xLEDHeartbeatCAN1;
+  const osThreadAttr_t UartLoggerAttributes = {
+    .name = "UART_Logger",
+    .stack_size = 256 * 4,
+    .priority = (osPriority_t) osPriorityHigh,
+  };
   const osThreadAttr_t LEDHeartbeatCAN1Attributes = {
     .name = "LED_HB_CAN1",
     .stack_size = 128 * 4,
-    .priority = (osPriority_t) osPriorityVeryLow1,
+    .priority = (osPriority_t) osPriorityLow1,
   };
-
-  osThreadId_t xLEDHeartbeatCAN2;
   const osThreadAttr_t LEDHeartbeatCAN2Attributes = {
     .name = "LED_HB_CAN2",
     .stack_size = 128 * 4,
-    .priority = (osPriority_t) osPriorityVeryLow,
+    .priority = (osPriority_t) osPriorityLow,
   };
-  /* USER END RTOS_TASKS */
+  /* USER CODE END RTOS_TASKS */
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreCAN1 = osSemaphoreNew(32, 0, NULL);
-  xSemaphoreCAN2 = osSemaphoreNew(32, 0, NULL);
-
-  if (xSemaphoreCAN1 == NULL || xSemaphoreCAN2 == NULL) Error_Handler();
-
-  ledContextCAN1.led = &led_can1;
-  ledContextCAN1.semaphore = xSemaphoreCAN1;
-  ledContextCAN2.led = &led_can2;
-  ledContextCAN2.semaphore = xSemaphoreCAN2;
+  xUARTDMASemaphore = osSemaphoreNew(1, 1, NULL);
+  if (xUARTDMASemaphore == NULL) Error_Handler();
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
-  /* add timers, ... */
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  xCAN1RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
-  xCAN2RxQueue = osMessageQueueNew(32, sizeof(CanMessage_t), NULL);
+  xCAN1RxQueue = osMessageQueueNew(64, sizeof(CanMessage_t), NULL);
+  xCAN2RxQueue = osMessageQueueNew(64, sizeof(CanMessage_t), NULL);
+  xUARTQueue = osMessageQueueNew(128, sizeof(CanMessage_t), NULL);
 
-  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL) Error_Handler();
+  if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL || xUARTQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
 
   /* USER CODE BEGIN RTOS_THREADS */
-  xCAN1rx = osThreadNew(vCANLoggerListen, &hcan1, &CAN1rxAttributes);
-  xCAN2rx = osThreadNew(vCANLoggerListen, &hcan2, &CAN2rxAttributes);
-  xLEDHeartbeatCAN1 = osThreadNew(vLEDHeartbeat, &ledContextCAN1, &LEDHeartbeatCAN1Attributes);
-  xLEDHeartbeatCAN2 = osThreadNew(vLEDHeartbeat, &ledContextCAN2, &LEDHeartbeatCAN2Attributes);
+  xCAN1rxTask = osThreadNew(vCANListener, &hcan1, &CAN1rxAttributes);
+  xCAN2rxTask = osThreadNew(vCANListener, &hcan2, &CAN2rxAttributes);
+  xUartTask = osThreadNew(vUARTLogger, NULL, &UartLoggerAttributes);
+  xCAN1LedTask = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
+  xCAN2LedTask = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
 
-  /* USER CODE BEGIN 3 */
-  /* USER CODE END 3 */
-
   /* Start scheduler */
+  DEBUG_PRINT("Starting RTOS init scheduler\r\n");
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
@@ -198,9 +212,10 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 4 */
+    /* USER CODE BEGIN 3 */
+    DEBUG_PRINT("ERROR: RTOS scheduler crashed!\r\n");
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 4 */
 }
 
 /**
@@ -265,7 +280,7 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 4;
+  hcan1.Init.Prescaler = 8;
   hcan1.Init.Mode = CAN_MODE_SILENT;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_16TQ;
@@ -281,7 +296,7 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-
+  DEBUG_PRINT("CAN1 initialized!\r\n");
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -302,7 +317,7 @@ static void MX_CAN2_Init(void)
 
   /* USER CODE END CAN2_Init 1 */
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 8;
+  hcan2.Init.Prescaler = 16;
   hcan2.Init.Mode = CAN_MODE_SILENT;
   hcan2.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan2.Init.TimeSeg1 = CAN_BS1_16TQ;
@@ -318,7 +333,7 @@ static void MX_CAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN2_Init 2 */
-
+  DEBUG_PRINT("CAN2 initialized!\r\n");
   /* USER CODE END CAN2_Init 2 */
 
 }
@@ -345,17 +360,50 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd.Init.ClockDiv = 0;
-  if (HAL_SD_Init(&hsd) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  //if (HAL_SD_Init(&hsd) != HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
+  //if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
   /* USER CODE BEGIN SDIO_Init 2 */
-
+  //DEBUG_PRINT("SDIO initialized!\r\n");
   /* USER CODE END SDIO_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+  DEBUG_PRINT("USART1 initialized!\r\n");
+  /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -375,7 +423,13 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream6_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+  /* DMA2_Stream7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
+  /* USER CODE BEGIN MX_DMA_Init 1 */
+  DEBUG_PRINT("DMA initialized!\r\n");
+  /* USER CODE END MX_DMA_Init 1 */
 }
 
 /**
@@ -398,7 +452,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PC13 PC14 PC15 PC0
                            PC1 PC2 PC3 PC4
@@ -418,41 +472,38 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3
                            PA4 PA5 PA6 PA7
-                           PA8 PA9 PA10 PA11
-                           PA12 PA13 PA14 PA15 */
+                           PA8 PA11 PA12 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
                           |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+                          |GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB1 PB2 PB10
-                           PB11 PB14 PB15 PB6
-                           PB7 */
+                           PB11 PB14 PB15 PB3
+                           PB4 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10
-                          |GPIO_PIN_11|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_6
-                          |GPIO_PIN_7;
+                          |GPIO_PIN_11|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_3
+                          |GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB3 PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  /*Configure GPIO pins : PB5 PB6 PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  DEBUG_PRINT("GPIO initialized!\r\n");
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* USER CODE BEGIN 5 */
-
-/* USER CODE END 5 */
+/* USER CODE BEGIN 4 */
+/* USER CODE END 4 */
 
 /**
   * @brief  Period elapsed callback in non blocking mode
@@ -482,6 +533,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   */
 void Error_Handler(void)
 {
+  DEBUG_PRINT("ERROR: entering error handler\r\n");
+
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();

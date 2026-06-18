@@ -15,6 +15,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "canlog.h"
+#include "main.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "cmsis_os.h"
@@ -24,12 +25,15 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 
+extern osThreadId_t xCAN1LedTask;
+extern osThreadId_t xCAN2LedTask;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-/* BEGIN CAN_Logger_Init */
 /**
-  * @brief  Initialize CAN bus logger.
-  * @param  argument: hcan1, hcan2
+  * @brief  Initializes the CAN logger modules, OS threads, queues, and hardware.
+  * @param  hcan1 Pointer to the CAN1 handle
+  * @param  hcan2 Pointer to the CAN2 handle
   * @retval None
   */
 void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
@@ -47,73 +51,87 @@ void CAN_Logger_Init(CAN_HandleTypeDef *hcan1, CAN_HandleTypeDef *hcan2)
 
     filter.FilterBank = 0;
     if (HAL_CAN_ConfigFilter(hcan1, &filter) != HAL_OK) Error_Handler();
-    if (HAL_CAN_Start(hcan1) != HAL_OK) Error_Handler();
 
     filter.FilterBank = 14;
     if (HAL_CAN_ConfigFilter(hcan2, &filter) != HAL_OK) Error_Handler();
-    if (HAL_CAN_Start(hcan2) != HAL_OK) Error_Handler();
 }
 /* END CAN_Logger_Init */
 
 /* BEGIN HAL_CAN_RxFifo0MsgPendingCallback */
 /**
   * @brief  ISR for CAN message pending in FIFO0
-  * @param  argument: Can handle hcan (hcan1 or hcan2)
+  * @param  hcan: CAN handle hcan (hcan1 or hcan2)
   * @retval None
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    /* CODE BEGIN */
     CanMessage_t message;
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t data[8];
 
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) Error_Handler();
+    osMessageQueueId_t queue;
+    osThreadId_t led_task;
 
-    message.id = rxHeader.ExtId;
+    // TODO: manage the case of FIFO overflow
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, data) != HAL_OK) return;
+
+    if (rxHeader.IDE == CAN_ID_EXT) message.id = rxHeader.ExtId;
+    else message.id = rxHeader.StdId;
     message.dlc = rxHeader.DLC;
     message.isExtended = (rxHeader.IDE == CAN_ID_EXT);
+    message.source = (hcan->Instance == CAN1) ? 1 : 2;
     memcpy(message.payload, data, rxHeader.DLC);
 
-    osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
-    if (osMessageQueuePut(queue, &message, 0U, 0U) != osOK)
+    if (hcan->Instance == CAN1)
     {
-        // TODO: better handling: flash error_led on osTimeout, call Error_Handler() when other errors
-
-        // send errors like queue full via UART
+        queue    = xCAN1RxQueue;
+        led_task = xCAN1LedTask;
+    }
+    else
+    {
+        queue    = xCAN2RxQueue;
+        led_task = xCAN2LedTask;
     }
 
-    osSemaphoreId_t semaphore = (hcan->Instance == CAN1) ? xSemaphoreCAN1 : xSemaphoreCAN2;
-    osSemaphoreRelease(semaphore);
-    /* CODE END */
+    if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
+    {
+        osThreadFlagsSet(led_task, 0x01);
+    }
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
 
-/* BEGIN vCANLoggerListen */
+/* BEGIN vCANListener */
 /**
   * @brief  Log incoming CAN bus traffic in FIFO buffer
   * @param  argument: Not used
   * @retval None
   */
-void vCANLoggerListen(void *argument)
+void vCANListener(void *argument)
 {
-  /* CODE BEGIN */
   CAN_HandleTypeDef *hcan = (CAN_HandleTypeDef*)argument;
   osMessageQueueId_t queue = (hcan->Instance == CAN1) ? xCAN1RxQueue : xCAN2RxQueue;
   CanMessage_t message;
 
+  if (HAL_CAN_Start(hcan) != HAL_OK) Error_Handler();
   HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+  uint32_t irqn = (hcan->Instance == CAN1) ? CAN1_RX0_IRQn : CAN2_RX0_IRQn;
+  HAL_NVIC_SetPriority(irqn, 6, 0);
+  HAL_NVIC_EnableIRQ(irqn);
 
   for (;;)
   {
-    if (osMessageQueueGet(queue, &message, NULL, osWaitForever) == osOK)
-	{
-					//
-	}
+    if (osMessageQueueGet(queue, &message, NULL, 1000) == osOK)
+    {
+          // J1939 decoding
+
+      osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
+    }
+    else DEBUG_PRINT("No CAN yet!\r\n");
+
   }
-	/* CODE END */
 }
-/* END vCANLoggerListen */
+/* END vCANListener */
 
 /* BEGIN vLEDHeartbeat */
 /**
@@ -123,15 +141,15 @@ void vCANLoggerListen(void *argument)
   */
 void vLEDHeartbeat(void *argument)
 {
-    /* CODE BEGIN */
-    LEDContext *context = (LEDContext*)argument;
+  LED_Config *led = (LED_Config*)argument;
 
-    for (;;)
-    {
-      if (osSemaphoreAcquire(context->semaphore, 25U) == osOK) HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_SET);
-      else HAL_GPIO_WritePin(context->led->port, context->led->pin, GPIO_PIN_RESET);
-    }
-    /* CODE END */
+  for (;;)
+  {
+    uint32_t notification = osThreadFlagsWait(0x01, osFlagsWaitAny, LED_BLINK_MS);
+
+    if (notification & 0x01) HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_SET);
+    else HAL_GPIO_WritePin(led->port, led->pin, GPIO_PIN_RESET);
+  }
 }
 /* END vLEDHeartbeat */
 /* USER CODE END FunctionPrototypes */
