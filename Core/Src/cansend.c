@@ -114,7 +114,7 @@ void vUARTLogger(void *argument)
 
       if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
       {
-          DEBUG_PRINT("CAN frame sent via UART\r\n");
+        DEBUG_PRINT("CAN frame sent via UART\r\n");
       }
       else
       {
