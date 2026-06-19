@@ -6,3 +6,4 @@ Core/Inc/Backup/
 .bak
 .gitignore
 can_logger Debug.launch
+Debug
