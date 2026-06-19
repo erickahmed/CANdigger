@@ -1,3 +1,4 @@
+
 #MicroXplorer Configuration settings - do not modify
 CAD.formats=
 CAD.pinconfig=
@@ -193,8 +194,8 @@ ProjectManager.MultiThreaded=true
 ProjectManager.NoMain=false
 ProjectManager.PreviousToolchain=STM32CubeIDE
 ProjectManager.ProjectBuild=false
-ProjectManager.ProjectFileName=can_logger.ioc
-ProjectManager.ProjectName=can_logger
+ProjectManager.ProjectFileName=can-logger.ioc
+ProjectManager.ProjectName=can-logger
 ProjectManager.ProjectStructure=
 ProjectManager.RegisterCallBack=CAN
 ProjectManager.StackSize=0x400

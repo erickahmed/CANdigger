@@ -1,9 +1,4 @@
-.cproject
-.osx.project
 .git
-.project
-.mxproject
-.settings
 .DS_Store
 .metadata
 Core/Src/Backup/
