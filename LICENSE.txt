@@ -168,20 +168,3 @@ TERMS AND CONDITIONS
     17. Interpretation of Sections 15 and 16.
 
     If the disclaimer of warranty and limitation of liability provided above cannot be given local legal effect according to their terms, reviewing courts shall apply local law that most closely approximates an absolute waiver of all civil liability in connection with the Program, unless a warranty or assumption of liability accompanies a copy of the Program in return for a fee.
-
-Standard License Header
-Copyright (C) 2026 Erick Ahmed
-engineering@erickahmed.com
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-© 2018 SPDX Workgroup a Linux Foundation Project. All Rights Reserved.
-
-Linux Foundation is a registered trademark of The Linux Foundation. Linux is a registered trademark of Linus Torvalds.
-
-Please see our privacy policy and terms of use.
-top of page
