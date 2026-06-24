@@ -145,12 +145,12 @@ int main(void)
   /* USER CODE BEGIN RTOS_TASKS */
   const osThreadAttr_t CAN1rxAttributes = {
     .name = "CAN1rx",
-    .stack_size = 128 * 4,
+    .stack_size = 512 * 4,
     .priority = (osPriority_t) osPriorityRealtime1,
   };
   const osThreadAttr_t CAN2rxAttributes = {
     .name = "CAN2rx",
-    .stack_size = 128 * 4,
+    .stack_size = 512 * 4,
     .priority = (osPriority_t) osPriorityRealtime,
   };
   const osThreadAttr_t UartLoggerAttributes = {
