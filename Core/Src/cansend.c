@@ -74,9 +74,9 @@ static int format_can_message(char *buf, uint8_t source, const CanMessage_t *mes
 {
   const char hex[] = "0123456789ABCDEF";
 
-  buf[0] = '[C';
-  buf[1] = (source == 1) ? '1]' : '2]';
-  buf[2] = '';
+  buf[0] = 'C';
+  buf[1] = (source == 1) ? '1' : '2';
+  buf[2] = ':';
 
   buf[3]  = hex[(message->id >> 28) & 0x0F];
   buf[4]  = hex[(message->id >> 24) & 0x0F];
@@ -166,15 +166,15 @@ void vUARTLogger(void *argument)
 
   for (;;)
   {
-    DEBUG_PRINT("[D] Waiting for CAN traffic...\r\n");
+	uint32_t queue_timeout = 2500U;
 
-    #ifdef DEBUG_DUMMY_FRAME
-    uint32_t queue_timeout = 1000U;
-    osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
-    osDelay(1000);
-    #else
-    uint32_t queue_timeout = osWaitForever;
-    #endif
+	//#ifdef DEBUG_DUMMY_FRAME
+    //uint32_t queue_timeout = 100U;
+    //osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
+    //osDelay(500);
+    //#else
+    //uint32_t queue_timeout = osWaitForever;
+   // #endif
 
    	if (osMessageQueueGet(xUARTQueue, &message, NULL, queue_timeout) == osOK)
 	{
@@ -190,6 +190,7 @@ void vUARTLogger(void *argument)
       }
       else DEBUG_PRINT("[E] Semaphore timeout! UART might be stuck in BUSY state.\r\n");
 	}
+   	else DEBUG_PRINT("[D] Waiting for CAN traffic...\r\n");
   }
 }
 /* END vUARTLogger */
