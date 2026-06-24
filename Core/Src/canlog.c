@@ -93,10 +93,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         led_task = xCAN2LedTask;
     }
 
-    if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK)
-    {
-        osThreadFlagsSet(led_task, 0x01);
-    }
+    if (osMessageQueuePut(queue, &message, 0U, 0U) == osOK) osThreadFlagsSet(led_task, 0x01);
 }
 /* END HAL_CAN_RxFifo0MsgPendingCallback */
 
