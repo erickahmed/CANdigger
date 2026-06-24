@@ -76,6 +76,8 @@ static void MX_CAN2_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 
+void uart_printf(const char *fmt, ...);
+
 /* USER CODE BEGIN PFP */
 int _write(int file, char *ptr, int len)
 {

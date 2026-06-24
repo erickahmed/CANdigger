@@ -46,7 +46,7 @@ extern "C" {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 //#define DEBUG_ITM
-//#define DEBUG_DUMMY_FRAME
+#define DEBUG_DUMMY_FRAME
 
 #ifdef DEBUG_ITM
 #include <stdio.h>

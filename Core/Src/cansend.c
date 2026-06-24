@@ -52,11 +52,14 @@ void uart_printf(const char *fmt, ...)
     {
       if (osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever) == osOK)
       {
-        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)buf, len) != HAL_OK) osSemaphoreRelease(xUARTDMASemaphore);
-        else osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+        HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+        osSemaphoreRelease(xUARTDMASemaphore);
       }
     }
-    else HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+    else
+    {
+      HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+    }
   }
 }
 /* END uart_printf */
@@ -71,9 +74,9 @@ static int format_can_message(char *buf, uint8_t source, const CanMessage_t *mes
 {
   const char hex[] = "0123456789ABCDEF";
 
-  buf[0] = 'C';
-  buf[1] = (source == 1) ? '1' : '2';
-  buf[2] = ':';
+  buf[0] = '[C';
+  buf[1] = (source == 1) ? '1]' : '2]';
+  buf[2] = '';
 
   buf[3]  = hex[(message->id >> 28) & 0x0F];
   buf[4]  = hex[(message->id >> 24) & 0x0F];
@@ -128,7 +131,19 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 }
 /* END HAL_UART_TxCpltCallback */
 
-/* BEGIN vUARTLoggerListen */
+/* BEGIN HAL_UART_ErrorCallback */
+/**
+  * @brief  Safely release UART semaphore inside ISR and yield task if possible.
+  * @param  argument: UART handle
+  * @retval None
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1) osSemaphoreRelease(xUARTDMASemaphore);
+}
+/* END HAL_UART_ErrorCallback */
+
+/* BEGIN vUARTLogger */
 /**
   * @brief  Send CAN bus traffic saved in FIFO buffer to USART1
   * @param  argument: Not used
@@ -155,13 +170,10 @@ void vUARTLogger(void *argument)
 
     #ifdef DEBUG_DUMMY_FRAME
     uint32_t queue_timeout = 1000U;
-    #else
-    uint32_t queue_timeout = osWaitForever;
-    #endif
-
-    #ifdef DEBUG_DUMMY_FRAME
     osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
     osDelay(1000);
+    #else
+    uint32_t queue_timeout = osWaitForever;
     #endif
 
    	if (osMessageQueueGet(xUARTQueue, &message, NULL, queue_timeout) == osOK)
@@ -170,12 +182,14 @@ void vUARTLogger(void *argument)
       {
         int len = format_can_message(tx_buffer, message.source, &message);
 
-        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) != HAL_OK) Error_Handler();
-        else DEBUG_PRINT("[E] HAL error, CAN frame NOT sent!\r\n");
-        osSemaphoreRelease(xUARTDMASemaphore);
+        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) != HAL_OK)
+        {
+          osSemaphoreRelease(xUARTDMASemaphore);
+          DEBUG_PRINT("[E] HAL error, CAN frame NOT sent!\r\n");
+        }
       }
       else DEBUG_PRINT("[E] Semaphore timeout! UART might be stuck in BUSY state.\r\n");
 	}
   }
 }
-/* END vUARTLoggerListen */
+/* END vUARTLogger */
