@@ -104,7 +104,7 @@ int main(void)
     ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_SYNCENA_Msk | ITM_TCR_SWOENA_Msk;
   }
 
-  DEBUG_PRINT("Booting system\r\n");
+  DEBUG_PRINT("[L] Booting system\r\n");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -113,7 +113,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  DEBUG_PRINT("Configuring system clock\r\n");
+  DEBUG_PRINT("[L] Configuring system clock\r\n");
 
   /* USER CODE END Init */
 
@@ -121,7 +121,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  DEBUG_PRINT("Initializing configured peripherals...\r\n");
+  DEBUG_PRINT("[L] Initializing configured peripherals...\r\n");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -132,14 +132,14 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  DEBUG_PRINT("Initializing CAN bus logger\r\n");
+  DEBUG_PRINT("[L] Initializing CAN bus logger\r\n");
   CAN_Logger_Init(&hcan1, &hcan2);
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
 
-  DEBUG_PRINT("Creating RTOS entities\r\n");
+  DEBUG_PRINT("[L] Creating RTOS entities\r\n");
 
   /* USER CODE BEGIN RTOS_TASKS */
   const osThreadAttr_t CAN1rxAttributes = {
@@ -200,7 +200,7 @@ int main(void)
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
-  DEBUG_PRINT("Starting RTOS init scheduler\r\n");
+  DEBUG_PRINT("[L] Starting RTOS init scheduler\r\n");
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
@@ -212,7 +212,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    DEBUG_PRINT("ERROR: RTOS scheduler crashed!\r\n");
+    DEBUG_PRINT("[E] RTOS scheduler crashed!\r\n");
     /* USER CODE END 3 */
   }
 }
@@ -295,7 +295,7 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-  DEBUG_PRINT("CAN1 initialized!\r\n");
+  DEBUG_PRINT("[L] CAN1 initialized\r\n");
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -332,7 +332,7 @@ static void MX_CAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN2_Init 2 */
-  DEBUG_PRINT("CAN2 initialized!\r\n");
+  DEBUG_PRINT("[L] CAN2 initialized\r\n");
   /* USER CODE END CAN2_Init 2 */
 
 }
@@ -368,7 +368,7 @@ static void MX_SDIO_SD_Init(void)
   //  Error_Handler();
   //}
   /* USER CODE BEGIN SDIO_Init 2 */
-  //DEBUG_PRINT("SDIO initialized!\r\n");
+  //DEBUG_PRINT("[L] SDIO initialized\r\n");
   /* USER CODE END SDIO_Init 2 */
 
 }
@@ -401,7 +401,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-  DEBUG_PRINT("USART1 initialized!\r\n");
+  DEBUG_PRINT("[L] USART1 initialized\r\n");
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -427,7 +427,7 @@ static void MX_DMA_Init(void)
   HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
   /* USER CODE BEGIN MX_DMA_Init 1 */
-  DEBUG_PRINT("DMA initialized!\r\n");
+  DEBUG_PRINT("[L] DMA initialized\r\n");
   /* USER CODE END MX_DMA_Init 1 */
 }
 
@@ -497,7 +497,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-  DEBUG_PRINT("GPIO initialized!\r\n");
+  DEBUG_PRINT("[L] GPIO initialized\r\n");
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -532,7 +532,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   */
 void Error_Handler(void)
 {
-  DEBUG_PRINT("ERROR: entering error handler\r\n");
+  DEBUG_PRINT("[E] Entering error handler\r\n");
 
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */

@@ -127,8 +127,6 @@ void vCANListener(void *argument)
 
       osMessageQueuePut(xUARTQueue, &message, 0U, 0U);
     }
-    else DEBUG_PRINT("No CAN yet!\r\n");
-
   }
 }
 /* END vCANListener */

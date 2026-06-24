@@ -151,7 +151,7 @@ void vUARTLogger(void *argument)
 
   for (;;)
   {
-    DEBUG_PRINT("Waiting for CAN traffic...\r\n");
+    DEBUG_PRINT("[D] Waiting for CAN traffic...\r\n");
 
     #ifdef DEBUG_DUMMY_FRAME
     uint32_t queue_timeout = 1000U;
@@ -170,20 +170,11 @@ void vUARTLogger(void *argument)
       {
         int len = format_can_message(tx_buffer, message.source, &message);
 
-        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) == HAL_OK)
-        {
-          DEBUG_PRINT("CAN frame sent via UART\r\n");
-        }
-        else
-        {
-          osSemaphoreRelease(xUARTDMASemaphore);
-          DEBUG_PRINT("HAL error, CAN frame NOT sent!\r\n");
-        }
+        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)tx_buffer, len) != HAL_OK) Error_Handler();
+        else DEBUG_PRINT("[E] HAL error, CAN frame NOT sent!\r\n");
+        osSemaphoreRelease(xUARTDMASemaphore);
       }
-      else
-      {
-        DEBUG_PRINT("ERROR: Semaphore timeout! UART might be stuck in BUSY state.\r\n");
-      }
+      else DEBUG_PRINT("[E] Semaphore timeout! UART might be stuck in BUSY state.\r\n");
 	}
   }
 }
