@@ -20,11 +20,46 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "canlog.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include "cmsis_os.h"
+#include "stm32f4xx.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
 extern osSemaphoreId_t xUARTDMASemaphore;
 extern osMessageQueueId_t xUARTQueue;
+extern UART_HandleTypeDef huart1;
+extern osSemaphoreId_t xUARTDMASemaphore;
+
+/* BEGIN uart_printf */
+/**
+  * @brief  Implementation of a simple print to UART.
+  * @param  arguments: strings to print
+  * @retval None
+  */
+void uart_printf(const char *fmt, ...)
+{
+  static char buf[128];
+  va_list args;
+  va_start(args, fmt);
+  int len = vsnprintf(buf, sizeof(buf), fmt, args);
+  va_end(args);
+
+  if (len > 0)
+  {
+    if (osKernelGetState() == osKernelRunning && __get_IPSR() == 0)
+    {
+      if (osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever) == osOK)
+      {
+        if (HAL_UART_Transmit_DMA(&huart1, (uint8_t*)buf, len) != HAL_OK) osSemaphoreRelease(xUARTDMASemaphore);
+        else osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever);
+      }
+    }
+    else HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+  }
+}
+/* END uart_printf */
 
 /* BEGIN format_can_message */
 /**

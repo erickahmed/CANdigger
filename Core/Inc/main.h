@@ -52,7 +52,7 @@ extern "C" {
 #include <stdio.h>
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #else
-#define DEBUG_PRINT(...)
+#define DEBUG_PRINT(...) uart_printf(__VA_ARGS__)
 #endif
 /* USER CODE END EM */
 
