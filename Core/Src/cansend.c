@@ -124,22 +124,19 @@ static int format_can_message(char *buf, uint8_t source, const CanMessage_t *mes
   */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart->Instance == USART1)
-  {
-    osSemaphoreRelease(xUARTDMASemaphore);
-  }
+  if (huart->Instance == USART1) osSemaphoreRelease(xUARTDMASemaphore);
 }
 /* END HAL_UART_TxCpltCallback */
 
 /* BEGIN HAL_UART_ErrorCallback */
 /**
-  * @brief  Safely release UART semaphore inside ISR and yield task if possible.
+  * @brief  Handle UART errors
   * @param  argument: UART handle
   * @retval None
   */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-  if (huart->Instance == USART1) osSemaphoreRelease(xUARTDMASemaphore);
+  Error_Handler();
 }
 /* END HAL_UART_ErrorCallback */
 
