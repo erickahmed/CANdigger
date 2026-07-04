@@ -114,7 +114,7 @@ void vCANListener(void *argument)
   HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
   uint32_t irqn = (hcan->Instance == CAN1) ? CAN1_RX0_IRQn : CAN2_RX0_IRQn;
-  HAL_NVIC_SetPriority(irqn, 6, 0);
+  HAL_NVIC_SetPriority(irqn, 5, 0);
   HAL_NVIC_EnableIRQ(irqn);
 
   for (;;)
