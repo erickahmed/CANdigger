@@ -22,6 +22,7 @@
 
 #include "main.h"
 
+void uart_printf(const char *fmt, ...);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 void vUARTLogger(void *argument);
 

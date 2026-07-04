@@ -18,6 +18,7 @@
 #include "main.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "cansend.h"
 #include "cmsis_os.h"
 #include <string.h>
 /* USER CODE END Includes */
