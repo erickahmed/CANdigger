@@ -555,8 +555,8 @@ void Error_Handler(void)
 
   while (1)
   {
-    HAL_GPIO_TogglePin(led_error.port, led_error.pin);
-    HAL_Delay(250);
+      HAL_GPIO_TogglePin(led_error.port, led_error.pin);
+      for(volatile uint32_t i = 0; i < 4000000; i++);
   }
   /* USER CODE END Error_Handler_Debug */
 }
