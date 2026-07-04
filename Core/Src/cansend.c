@@ -129,7 +129,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 /* END HAL_UART_TxCpltCallback */
 
 /* BEGIN HAL_UART_ErrorCallback */
-/**
+/**``MEN
   * @brief  Handle UART errors
   * @param  argument: UART handle
   * @retval None
