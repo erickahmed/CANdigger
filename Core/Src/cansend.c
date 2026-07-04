@@ -161,7 +161,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 void vUARTLogger(void *argument)
 {
   CanMessage_t message;
-  char tx_buffer[45];
+  static char tx_buffer[45];
 
   #ifdef DEBUG_DUMMY_FRAME
   CanMessage_t dummy_frame = {
