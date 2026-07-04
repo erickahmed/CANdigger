@@ -50,7 +50,7 @@ void uart_printf(const char *fmt, ...)
   {
     if (osKernelGetState() == osKernelRunning && __get_IPSR() == 0)
     {
-      if (osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever) == osOK)
+      if (osSemaphoreAcquire(xUARTDMASemaphore, 100U) == osOK)
       {
         HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
         osSemaphoreRelease(xUARTDMASemaphore);
