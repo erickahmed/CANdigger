@@ -175,19 +175,9 @@ void vUARTLogger(void *argument)
 
   for (;;)
   {
-	uint32_t queue_timeout = 2500U;
-
-	//#ifdef DEBUG_DUMMY_FRAME
-    //uint32_t queue_timeout = 100U;
-    //osMessageQueuePut(xUARTQueue, &dummy_frame, 0U, 0U);
-    //osDelay(500);
-    //#else
-    //uint32_t queue_timeout = osWaitForever;
-   // #endif
-
-   	if (osMessageQueueGet(xUARTQueue, &message, NULL, queue_timeout) == osOK)
-	{
-      if (osSemaphoreAcquire(xUARTDMASemaphore, queue_timeout) == osOK)
+    if (osMessageQueueGet(xUARTQueue, &message, NULL, 1000U) == osOK)
+    {
+      if (osSemaphoreAcquire(xUARTDMASemaphore, 100U) == osOK)
       {
         int len = format_can_message(tx_buffer, message.source, &message);
 
