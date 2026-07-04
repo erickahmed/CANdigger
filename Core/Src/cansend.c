@@ -136,7 +136,19 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-  Error_Handler();
+  if (huart->Instance == USART1)
+  {
+    __HAL_UART_CLEAR_OREFLAG(huart);
+    __HAL_UART_CLEAR_FEFLAG(huart);
+    __HAL_UART_CLEAR_NEFLAG(huart);
+    __HAL_UART_CLEAR_PEFLAG(huart);
+
+    HAL_UART_DMAStop(huart);
+
+    huart->gState = HAL_UART_STATE_READY;
+
+    osSemaphoreRelease(xUARTDMASemaphore);
+  }
 }
 /* END HAL_UART_ErrorCallback */
 
