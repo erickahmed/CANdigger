@@ -557,17 +557,20 @@ void Error_Handler(void)
 
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY)
+  {
+    DEBUG_PRINT("[E] CAN1 error code: 0x%08lX\r\n", (unsigned long)HAL_CAN_GetError(&hcan1));
+  }
+  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY)
+  {
+    DEBUG_PRINT("[E] CAN2 error code: 0x%08lX\r\n", (unsigned long)HAL_CAN_GetError(&hcan2));
+  }
+
+  // TODO: write error to SD
+
+  /* Disabling interrupts here (after reporting above) freezes the FreeRTOS
+     scheduler for good, since it relies on SysTick/PendSV. */
   __disable_irq();
-
-  //TODO: check if it is necessary to stop FreeRTOS
-
-  uint32_t error_code_can1;
-  uint32_t error_code_can2;
-
-  if (HAL_CAN_GetState(&hcan1) != HAL_CAN_STATE_READY) error_code_can1 = HAL_CAN_GetError(&hcan1);
-  if (HAL_CAN_GetState(&hcan2) != HAL_CAN_STATE_READY) error_code_can2 = HAL_CAN_GetError(&hcan2);
-
-  // TODO: write error to SD and/or serial
 
   HAL_GPIO_WritePin(led_can1.port, led_can1.pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(led_can2.port, led_can2.pin, GPIO_PIN_RESET);
