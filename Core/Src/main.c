@@ -196,6 +196,9 @@ int main(void)
   xUartTask = osThreadNew(vUARTLogger, NULL, &UartLoggerAttributes);
   xCAN1LedTask = osThreadNew(vLEDHeartbeat, &led_can1, &LEDHeartbeatCAN1Attributes);
   xCAN2LedTask = osThreadNew(vLEDHeartbeat, &led_can2, &LEDHeartbeatCAN2Attributes);
+
+  if (xCAN1rxTask == NULL || xCAN2rxTask == NULL || xUartTask == NULL ||
+      xCAN1LedTask == NULL || xCAN2LedTask == NULL) Error_Handler();
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
