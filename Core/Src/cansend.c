@@ -40,17 +40,24 @@ extern osSemaphoreId_t xUARTDMASemaphore;
   */
 void uart_printf(const char *fmt, ...)
 {
+  if (__get_IPSR() != 0) return;
+
   char buffer[128];
   va_list args;
   va_start(args, fmt);
+
   int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
 
   if (len > 0)
   {
-    if (osKernelGetState() == osKernelRunning && __get_IPSR() == 0)
+    // 2. OVERFLOW PROTECTION: Cap length to prevent reading stack garbage
+    if (len >= sizeof(buffer)) len = sizeof(buffer) - 1;
+
+    if (osKernelGetState() == osKernelRunning)
     {
-      if (osSemaphoreAcquire(xUARTDMASemaphore, 100U) == osOK)
+      // 3. RELIABILITY: Wait indefinitely so debug prints aren't silently dropped
+      if (osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever) == osOK)
       {
         HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
         osSemaphoreRelease(xUARTDMASemaphore);
@@ -58,6 +65,7 @@ void uart_printf(const char *fmt, ...)
     }
     else
     {
+      // RTOS hasn't started yet (boot sequence), safe to poll directly
       HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
     }
   }
