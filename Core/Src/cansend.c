@@ -51,23 +51,17 @@ void uart_printf(const char *fmt, ...)
 
   if (len > 0)
   {
-    // 2. OVERFLOW PROTECTION: Cap length to prevent reading stack garbage
     if (len >= sizeof(buffer)) len = sizeof(buffer) - 1;
 
     if (osKernelGetState() == osKernelRunning)
     {
-      // 3. RELIABILITY: Wait indefinitely so debug prints aren't silently dropped
       if (osSemaphoreAcquire(xUARTDMASemaphore, osWaitForever) == osOK)
       {
         HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
         osSemaphoreRelease(xUARTDMASemaphore);
       }
     }
-    else
-    {
-      // RTOS hasn't started yet (boot sequence), safe to poll directly
-      HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
-    }
+    else HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
   }
 }
 /* END uart_printf */
@@ -183,7 +177,7 @@ void vUARTLogger(void *argument)
 
   for (;;)
   {
-    if (osMessageQueueGet(xUARTQueue, &message, NULL, 1000U) == osOK)
+    if (osMessageQueueGet(xUARTQueue, &message, NULL, osWaitForever) == osOK)
     {
       if (osSemaphoreAcquire(xUARTDMASemaphore, 100U) == osOK)
       {
