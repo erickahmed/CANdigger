@@ -183,9 +183,9 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  xCAN1RxQueue = osMessageQueueNew(64, sizeof(CanMessage_t), NULL);
-  xCAN2RxQueue = osMessageQueueNew(64, sizeof(CanMessage_t), NULL);
-  xUARTQueue = osMessageQueueNew(128, sizeof(CanMessage_t), NULL);
+  xCAN1RxQueue = osMessageQueueNew(2048, sizeof(CanMessage_t), NULL);
+  xCAN2RxQueue = osMessageQueueNew(2048, sizeof(CanMessage_t), NULL);
+  xUARTQueue = osMessageQueueNew(4096, sizeof(CanMessage_t), NULL);
 
   if (xCAN1RxQueue == NULL || xCAN2RxQueue == NULL || xUARTQueue == NULL) Error_Handler();
   /* USER CODE END RTOS_QUEUES */
