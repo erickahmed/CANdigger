@@ -40,10 +40,10 @@ extern osSemaphoreId_t xUARTDMASemaphore;
   */
 void uart_printf(const char *fmt, ...)
 {
-  static char buf[128];
+  char buffer[128];
   va_list args;
   va_start(args, fmt);
-  int len = vsnprintf(buf, sizeof(buf), fmt, args);
+  int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
 
   if (len > 0)
@@ -52,13 +52,13 @@ void uart_printf(const char *fmt, ...)
     {
       if (osSemaphoreAcquire(xUARTDMASemaphore, 100U) == osOK)
       {
-        HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
         osSemaphoreRelease(xUARTDMASemaphore);
       }
     }
     else
     {
-      HAL_UART_Transmit(&huart1, (uint8_t*)buf, len, HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart1, (uint8_t*)buffer, len, HAL_MAX_DELAY);
     }
   }
 }
@@ -70,49 +70,49 @@ void uart_printf(const char *fmt, ...)
   * @param  arguments: buffer, source, message
   * @retval None
   */
-static int format_can_message(char *buf, uint8_t source, const CanMessage_t *message)
+static int format_can_message(char *buffer, uint8_t source, const CanMessage_t *message)
 {
   const char hex[] = "0123456789ABCDEF";
 
-  buf[0] = 'C';
-  buf[1] = (source == 1) ? '1' : '2';
-  buf[2] = ':';
+  buffer[0] = 'C';
+  buffer[1] = (source == 1) ? '1' : '2';
+  buffer[2] = ':';
 
-  buf[3]  = hex[(message->id >> 28) & 0x0F];
-  buf[4]  = hex[(message->id >> 24) & 0x0F];
-  buf[5]  = hex[(message->id >> 20) & 0x0F];
-  buf[6]  = hex[(message->id >> 16) & 0x0F];
-  buf[7]  = hex[(message->id >> 12) & 0x0F];
-  buf[8]  = hex[(message->id >> 8) & 0x0F];
-  buf[9]  = hex[(message->id >> 4) & 0x0F];
-  buf[10] = hex[message->id & 0x0F];
+  buffer[3]  = hex[(message->id >> 28) & 0x0F];
+  buffer[4]  = hex[(message->id >> 24) & 0x0F];
+  buffer[5]  = hex[(message->id >> 20) & 0x0F];
+  buffer[6]  = hex[(message->id >> 16) & 0x0F];
+  buffer[7]  = hex[(message->id >> 12) & 0x0F];
+  buffer[8]  = hex[(message->id >> 8) & 0x0F];
+  buffer[9]  = hex[(message->id >> 4) & 0x0F];
+  buffer[10] = hex[message->id & 0x0F];
 
-  buf[11] = ' ';
-  buf[12] = hex[(message->dlc >> 4) & 0x0F];
-  buf[13] = hex[message->dlc & 0x0F];
-  buf[14] = ' ';
+  buffer[11] = ' ';
+  buffer[12] = hex[(message->dlc >> 4) & 0x0F];
+  buffer[13] = hex[message->dlc & 0x0F];
+  buffer[14] = ' ';
 
-  int idx = 15;
+  int index = 15;
   for (int i = 0; i < 8; i++)
   {
     if (i < message->dlc)
     {
-      buf[idx++] = hex[(message->payload[i] >> 4) & 0x0F];
-      buf[idx++] = hex[message->payload[i] & 0x0F];
+      buffer[index++] = hex[(message->payload[i] >> 4) & 0x0F];
+      buffer[index++] = hex[message->payload[i] & 0x0F];
     }
     else
     {
-      buf[idx++] = ' ';
-      buf[idx++] = ' ';
+      buffer[index++] = ' ';
+      buffer[index++] = ' ';
     }
-    if (i < 7) buf[idx++] = ' ';
+    if (i < 7) buffer[index++] = ' ';
   }
 
-  buf[idx++] = '\r';
-  buf[idx++] = '\n';
-  buf[idx] = '\0';
+  buffer[index++] = '\r';
+  buffer[index++] = '\n';
+  buffer[index] = '\0';
 
-  return idx;
+  return index;
 }
 /* END format_can_message */
 
