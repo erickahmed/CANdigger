@@ -1,4 +1,4 @@
-# Third-Party Notices
+# Copyright Notices
 
 This project is built with open source components and includes third-party software:
 
