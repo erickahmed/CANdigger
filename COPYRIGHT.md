@@ -4,7 +4,7 @@ This project is built with open source components and includes third-party softw
 
 ## 1. Original Application Code
 - **Copyright (c) 2026 Erick Ahmed**
-- **License:** [GNU General Public License v3.0](https://git.erickahmed.com/erickahmed/CANdigger/src/branch/main/LICENSE)
+- **License:** [GNU General Public License v3.0 or later](https://git.erickahmed.com/erickahmed/CANdigger/src/branch/main/LICENSE)
 
 ## 2. STM32F4 HAL Drivers
 - **Copyright (c) 2016 STMicroelectronics**
